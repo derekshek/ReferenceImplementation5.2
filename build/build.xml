@@ -1,0 +1,354 @@
+
+<project name="OEMProject" default="dist" basedir="..">
+	<description>
+        OEM build file Template
+    </description>
+
+	<echo message="Start the build!!!...." />
+
+	<!-- Read Properties file and set global props -->
+	<property file="build/build.properties" />
+	
+	<!-- Java Source -->
+	<property name="src"                 location="CommonSrc" />
+	<property name="customsrc"           location="CustomerSpecificSrc" />
+
+	<!-- Resources uder res -->
+	<property name="res"                 location="res" />
+	<property name="res-pentaho-generic" location="${res}/ConfigFiles-pentaho-generic" />
+	<property name="res-pentaho-version" location="${res}/ConfigFiles-pentaho-version-${version}" />
+	<property name="res-pentaho-theme"   location="${res}/ConfigFiles-theming" />
+	<property name="publish"             location="${res}/ContentAndDatasources" />
+	<property name="setupScripts"        location="${res}/SetupScripts" />
+	<property name="topLevelFiles"       location="${res}/TopLevelFiles" />
+	<property name="updateJARS"          location="${res}/UpdateJARS" />
+
+	<!-- These should not change -->
+	<property name="classes"       location="classes" />
+	<property name="customclasses" location="customclasses" />
+	<property name="dist"          location="dist" />
+	<property name="lib"           location="lib" />
+	<property name="publish-content" location="${publish}/Content" />
+	<property name="publish-mondrian" location="${publish}/Mondrian" />
+	<property name="publish-metadata" location="${publish}/Metadata" />
+	<property name="publish-jdbc"     location="${publish}/JDBC" />
+	<property name="publish-content-post"     location="${publish}/Content-post" />
+
+
+	<!-- set classpath -->
+	<path id="compile.classpath">
+		<fileset dir="${pentaho-install}/${pentaho-webapp-lib}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${pentaho-install}/${tomcat-lib}">
+			<include name="servlet-api.jar" />
+		</fileset>
+	</path>
+
+
+
+	<!--   
+	       Use install for pushing all changes
+	       Use publish for pushing changes to repository
+	       Use deploy  for pushing changes to filesystem (pentaho-solutions/system, etc)
+	 -->
+	
+	
+	<target name="install" depends="clean,setup,publish,deploy" />
+	
+	
+	
+	<!-- Compile -->
+	<target name="compile"  description="compile the source ">
+		<!-- deploy any extra jars (commons-configuration) to server for build -->
+		<copy todir="${pentaho-install}/${pentaho-webapp-lib}" >
+			<fileset dir="${lib}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+		
+		
+		<echo>Compiling the common java code from ${src}....</echo>
+		<mkdir dir="${classes}" />
+		<javac srcdir="${src}" destdir="${classes}" includeantruntime="false"
+			debug="true" debuglevel="lines,vars,source"
+			>
+			<classpath refid="compile.classpath" />
+		</javac>
+		<mkdir dir="${customclasses}" />
+
+	</target>
+
+	
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distr directory and JAR up the classes directory... -->
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/${server-name}" />
+		<mkdir dir="${dist}/${biserver-path}" />
+		<jar jarfile="${dist}/${pentaho-webapp-lib}/${dist-jar-name}.jar" basedir="${classes}" />
+		
+		<!-- Configuration copy generic and version specific files -->
+		<copy todir="${dist}" overwrite="true">
+			<fileset dir="${res-pentaho-generic}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist}" overwrite="true">
+			<fileset dir="${res-pentaho-version}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+			
+		<!-- Copy in the top level stuff (sample data, restartBA script ) -->
+		<copy todir="${dist}" overwrite="true">
+			<fileset dir="${topLevelFiles}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+
+
+		<!-- Get any system JARS we may modify -->
+		<antcall target="updateJars" />
+		<copy todir="${dist}" overwrite="true">
+			<fileset dir="${topLevelFiles}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+		
+
+		
+        <!-- NoCodeDsp.properties is copied here  - these would normally be in res, but may be in src for testing reasons -->
+		<copy todir="${dist}/${pentaho-webapp-classes}" overwrite="true">
+		 <fileset dir="${src}">
+		    <include name="**/*.properties"/>
+		 </fileset>
+		</copy>
+
+		
+        <!--  update tokenized paths  -->
+		<echo>Setting paths to ${pentaho-install}  ...</echo>
+		<replace dir="${dist}" value="${pentaho-install}" excludes="*jar" >
+		    <replacetoken>@@@PENTAHO_HOME@@@</replacetoken>
+		</replace>
+
+		<antcall target="dist-theme" />
+
+	</target>
+
+
+	<target name="dist-theme">
+		<echo>Copying Theme</echo>
+		<copy todir="${dist}" overwrite="true">
+			<fileset dir="${res-pentaho-theme}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+		<echo>Setting colors...</echo>
+		<replace dir="${dist}" value="${oem-color-1}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_COLOR_1@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-button-color}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_BUTTON_COLOR@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-button-color-2}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_BUTTON_COLOR_2@@@</replacetoken>
+		</replace>
+
+
+		<replace dir="${dist}" value="${oem-button-focus-color}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_BUTTON_FOCUS_COLOR@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-header-color}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_HEADER_COLOR_1@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-header-color-1}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_HEADER_COLOR@@@</replacetoken>
+		</replace>
+
+		<replace dir="${dist}" value="${oem-analyzer-header-color-1}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_1@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-analyzer-header-color-2}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_2@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-analyzer-header-color-measures}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_MEASURES@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-analyzer-layout-rows-color}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_ANALYZER_LAYOUT_ROWS_COLOR@@@;</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-page-background}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_PAGE_BACKGROUND@@@;</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-file-button-background}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_FILE_BROWSER_BUTTON_COLOR_BG@@@</replacetoken>
+		</replace>
+		<replace dir="${dist}" value="${oem-file-button-foreground}" excludes="*jar" includes="**/*.css" >
+		    <replacetoken>@@@OEM_FILE_BROWSER_BUTTON_COLOR_FG@@@</replacetoken>
+		</replace>
+	</target>
+	
+	<!-- Deploy -->
+	<target name="deploy" depends="dist">
+			<copy todir="${pentaho-install}" overwrite="true">
+			 <fileset dir="${dist}">
+			 </fileset>
+			</copy>
+		
+		<exec executable="${pentaho-install}/restartBA" /> 
+	</target>
+
+	
+	<!--   One-time setup tasks -->
+	<target name="setup" >
+		<mkdir dir="${pentaho-install}/logs" />
+		<symlink link="${pentaho-install}/logs/catalina.out" resource="${pentaho-install}/server/biserver-ee/tomcat/logs/catalina.out" overwrite="true" />
+		
+		<copy file="${res-pentaho-generic}/restartBA" tofile="${pentaho-install}/restartBA" />
+		<chmod file="${pentaho-install}/restartBA" perm="755"/>
+
+		 <apply executable="bash" addsourcefile="true" relative="false" > 
+				 	<srcfile />
+				 	<arg value="${pentaho-install}"/>
+				 	<arg value="${setupScripts}"/>
+				 	<!-- <targetfile />  -->
+
+		 	 		<fileset dir="${setupScripts}" casesensitive="yes">
+		 			      <include name="*.sh"/>
+				   </fileset>
+		 </apply>
+	</target>
+
+	
+	
+	<!--  Publish Content to repository -->
+	<target name="publish" depends="publishContent,publishMondrian,publishMetadata" />
+
+	<target name="publishContent">
+		 <apply executable="${pentaho-install}/${biserver-path}/import-export.sh" addsourcefile="true" relative="false" > 
+		 	<mapper type="regexp" from="^(.*)/[^/]*" to="/\1" />
+		 	<arg value="--file-path"/>
+		 	<srcfile prefix="&quot;" suffix="&quot;" />
+		 	<arg value="--path"/>
+		 	<targetfile prefix="&quot;" suffix="&quot;" />
+		 	<arg value="--import"/>
+		 	<arg value="--url=http://localhost:8080/pentaho"/>
+		 	<arg value="--username=admin"/>
+		 	<arg value="--password=password"/>
+		 	<arg value="--overwrite=true"/>
+		 	<arg value="--retainOwnership=true"/>
+		 	<arg value="--permission=true"/>
+		 	
+		    <fileset dir="${publish-content}" casesensitive="yes">
+		      <include name="**/*"/>
+		    </fileset>
+		  </apply>
+	</target>
+	
+	<target name="publishContentPost">
+		 <apply executable="curl" addsourcefile="true" relative="false" > 
+		 	<mapper type="regexp" from="^(.*)/[^/]*" to="/\1" />
+
+			<arg value="-F" />
+			<arg value="overwriteFile=true" />
+			<arg value="-F" />
+			<arg value="retainOwnership=true" />
+
+			<arg value="-F" />
+		 	<srcfile prefix="fileUpload=@" />
+			<arg value="-F" />
+		 	<targetfile prefix="importDir=" />
+		 	
+			<arg value="-u" />
+			<arg value="admin:password"/>
+			<arg value="http://localhost:8080/pentaho/api/repo/files/import"/>
+		    <fileset dir="${publish-content-post}" casesensitive="yes">
+		      <include name="**/*"/>
+		    </fileset>
+		  </apply>
+	</target>
+	
+	
+	
+	<target name="publishMondrian">
+			 <apply executable="curl" addsourcefile="true" relative="true" > 
+			 	<mapper type="regexp" from="^(.*)xml" to="/\1parameters" />
+			 	<arg value="-F" />
+			 	<srcfile prefix="uploadAnalysis=@${publish-mondrian}/" />
+			 	<arg value="-F" />
+			 	<targetfile prefix="parameters=@${publish-mondrian}/"  />
+
+			 	<arg value="-u" />
+			 	<arg value="admin:password"/>
+			 	<arg value="http://localhost:8080/pentaho/plugin/data-access/api/mondrian/postAnalysis"/>
+			 	
+			    <fileset dir="${publish-mondrian}" casesensitive="yes">
+			      <include name="**/*xml"/>
+			    </fileset>
+			  </apply>
+		</target>	
+	
+	<target name="publishMetadata">
+				 <apply executable="curl" addsourcefile="true" relative="true" > 
+				 	<mapper type="regexp" from="(.*)\.xmi" to="\1" />
+				 	<arg value="-F" />
+				 	<srcfile prefix="metadataFile=@${publish-metadata}/" />
+				 	<arg value="-F" />
+				 	<targetfile prefix="domainId="  />
+				 	<arg value="-F" />
+				 	<arg value="overwrite=true" />
+
+				 	<arg value="-u" />
+				 	<arg value="admin:password"/>
+				 	<arg value="http://localhost:8080/pentaho/plugin/data-access/api/metadata/postimport"/>
+				 	
+				    <fileset dir="${publish-metadata}" casesensitive="yes">
+				      <include name="**/*xmi"/>
+				    </fileset>
+				  </apply>
+			</target>	
+		
+	<target name="publishJDBC">
+				 <apply executable="curl" addsourcefile="true" relative="true" > 
+				 	<mapper type="regexp" from="(.*)\.json" to="\1" />
+				 	<arg value="-X" />
+				 	<arg value="POST" />
+				 	<arg value="--header" />
+				 	<arg value="Content-Type:application/json" />
+				 	<arg value="-d" />
+				 	<srcfile prefix="@${publish-jdbc}/" />
+				 	<arg value="-u" />
+				 	<arg value="admin:password"/>
+				 	<arg value="http://localhost:8080/pentaho/plugin/data-access/api/connection/add"/>
+				 	
+				    <fileset dir="${publish-jdbc}" casesensitive="yes">
+				      <include name="**/*json"/>
+				    </fileset>
+				  </apply>
+	</target>
+	
+	<target name="updateJars">
+		<!-- JAR files to update (messages) and deploy -->
+		<antcall target="updateJar">
+		   <param name="jarToUpdate" value="res/UpdateJARS/pentaho-platform-extensions/pentaho-platform-extensions-5.0.7.jar" />
+		   <param name="addToJar"    value="res/UpdateJARS/pentaho-platform-extensions" />
+	    </antcall>
+	</target>
+		
+	
+	<target name="updateJar">
+	   <jar destfile="${jarToUpdate}"  excludes="*jar" update="true" basedir="${addToJar}" />
+       <copy file="${jarToUpdate}"    todir="${dist}/${pentaho-webapp-lib}" />
+	</target>
+	
+	
+	<!-- Clean - Remove Distribution & classes directories for fresh build -->
+	<target name="clean" description="clean up">
+		<echo message="Cleaning..." />
+		<delete dir="${classes}" />
+		<delete dir="${customclasses}" />
+		<delete dir="${dist}" />
+	</target>
+
+	
+</project>
