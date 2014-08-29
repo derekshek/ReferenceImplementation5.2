@@ -18,11 +18,9 @@ package com.pentaho.oem.sk.userrole;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,11 +30,9 @@ import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.security.messages.Messages;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 
 import com.pentaho.oem.sk.OEMUtil;
@@ -50,8 +46,10 @@ public class OEMMultiUserRoleListService implements IUserRoleListService, Initia
 	private static final Log LOG = LogFactory.getLog(OEMMultiUserRoleListService.class);
 
     private List<IUserRoleListService> userRoleListServices;
-    private Comparator<String> usernameComparator;
-    private Comparator<GrantedAuthority> grantedAuthorityComparator;
+    @SuppressWarnings("unused")
+	private Comparator<String> usernameComparator;
+    @SuppressWarnings("unused")
+	private Comparator<GrantedAuthority> grantedAuthorityComparator;
 
 	private ITenantedPrincipleNameResolver userNameUtils;
 
@@ -162,7 +160,6 @@ public class OEMMultiUserRoleListService implements IUserRoleListService, Initia
 
     	username = userNameUtils.getPrincipleName(username);
     	GrantedAuthority[] authorities = null;
-        LinkedList<String> roleList = new LinkedList<String>();
         Set<String> results = new HashSet<String>();
         
         // Most of these calls are for the current user - avoid calling userDetails if possible

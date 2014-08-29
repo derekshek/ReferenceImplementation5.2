@@ -20,12 +20,9 @@ package com.pentaho.oem.sk.misc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Hashtable;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -33,7 +30,6 @@ import javax.naming.Name;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 /*************************************************************************************************
@@ -89,7 +85,7 @@ public class OEMBasicDataSourceFactory extends org.apache.commons.dbcp.BasicData
 
 	
 	@Override
-	public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable environment) throws Exception {
+	public Object getObjectInstance(Object obj, Name name, Context nameCtx, @SuppressWarnings("rawtypes") Hashtable environment) throws Exception {
 		Object o = super.getObjectInstance(obj, name, nameCtx, environment);
 		if (o != null) {
 			BasicDataSource ds = (BasicDataSource) o;

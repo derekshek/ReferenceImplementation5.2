@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
-//import org.jfree.util.Log;
 import org.pentaho.metadata.query.impl.sql.*;
 import org.pentaho.pms.mql.dialect.SQLQueryModel;
 import org.pentaho.metadata.query.model.Selection;
@@ -68,6 +67,7 @@ public class NoCodeSqlGenerator extends SqlGenerator {
 			DatabaseMeta databaseMeta) {
 		
 		Set<LogicalTable> selectedLogicalTables = new HashSet<LogicalTable>();
+		@SuppressWarnings("unused")
 		Set<IPhysicalTable> selectedPhysicalTables = new HashSet<IPhysicalTable>();
 		
 		// Get the user's custId from the session
@@ -85,6 +85,7 @@ public class NoCodeSqlGenerator extends SqlGenerator {
 			return;
 		}
 		
+		@SuppressWarnings("unchecked")
 		Iterator<String> keys = configuration.getKeys(businessView);
 		if (! keys.hasNext()){
 			LOG.debug("No properties for this view");
@@ -97,6 +98,7 @@ public class NoCodeSqlGenerator extends SqlGenerator {
 			for (Selection selection : selections) {
 				LogicalColumn column = selection.getLogicalColumn();
 				LogicalTable table = column.getLogicalTable();
+				@SuppressWarnings("unused")
 				IPhysicalTable ptable = column.getPhysicalColumn().getPhysicalTable();
 				selectedLogicalTables.add(table);
 			}

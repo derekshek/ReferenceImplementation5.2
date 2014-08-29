@@ -16,10 +16,7 @@
 */
 package com.pentaho.oem.sk.security.voter;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -29,11 +26,8 @@ import org.pentaho.platform.api.repository2.unified.IRepositoryAccessVoter;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileAcl;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.userdetails.User;
 
-import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
 
 public class OEMAccessVoter implements IRepositoryAccessVoter{
@@ -67,8 +61,6 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 			LOG.debug("No OEMUser authentication/authorities");
 			return true;
 		}
-		
-		String msg = user.getUsername() + " " + operation.name() + " " + file.getPath();
 		
 		// Get the content request path - turn into array
 		String[] topLevelDirs = getTopLevelDirNames(file);

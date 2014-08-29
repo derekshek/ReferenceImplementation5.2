@@ -153,12 +153,9 @@ not directly from the PentahoObjectFactory. -->
   <!--
   <bean id="connection-MDXOlap4j" class="org.pentaho.platform.plugin.services.connections.mondrian.MDXOlap4jConnection" scope="prototype" />
   -->
-  <!--
   <bean id="connection-MDXOlap4j" class="com.pentaho.oem.sk.nocode.NoCodeMDXOlap4jConnection" scope="prototype">
        <property name="dsp" value="com.pentaho.oem.sk.nocode.NoCodeDsp"/>
   </bean>
-  -->
-  <bean id="connection-MDXOlap4j" class="com.pentaho.example.ExampleMDXOlap4jConnection" scope="prototype" />
 
   <bean id="connection-XML" class="org.pentaho.platform.plugin.services.connections.xquery.XQConnection"
         scope="prototype"/>

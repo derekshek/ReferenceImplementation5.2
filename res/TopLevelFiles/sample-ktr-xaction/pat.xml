@@ -1,9 +1,0 @@
-<user authenticated="true">
-  <name>pat</name>
-  <roles>
-     <role>NoPublicUser</role>
-     <role>NoHomeUser</role>
-  </roles>
-  <tenantid>3</tenantid>
-  <tenantName>Tenant_folder_for_Pat</tenantName>
-</user>

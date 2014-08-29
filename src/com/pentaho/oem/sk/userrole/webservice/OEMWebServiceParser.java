@@ -13,7 +13,7 @@ public class OEMWebServiceParser {
 			
 	public String   getUserName()         { return userName; }
 	public String[] getRoles()            { return roles; }
-	public Map      getSessionVariables() { return sessionVariables; }
+	public Map<String,String>             getSessionVariables() { return sessionVariables; }
 	
 	public String getPassword() {
 		if (password == null){

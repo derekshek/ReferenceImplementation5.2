@@ -16,7 +16,6 @@
 */
 package com.pentaho.oem.sk.nocode;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -58,6 +57,7 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 	private static String UseContentChecksum     = "UseContentChecksum=true";
 	private static String ContentPattern         = ".*Catalog=mondrian:/([^;]+).*";
 	private static String MongoContentPattern    = ".*Catalog=([^;]+).*";
+	@SuppressWarnings("unused")
 	private static String DatabaseContentPattern = ".*Database=([^;]+).*";
 	private static String HostContentPattern     = ".*Host=([^;]+).*";
 	private static String MongoDatasource        = "MongoDataServicesProvider";
@@ -86,7 +86,6 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 				String catalog;
 				String useDsp = dsp;
 				String useChecksum = UseContentChecksum;
-				String useJdbcConnectionUuid = null;
 				if (url.contains(MongoDatasource)){
 					catalog = url.replaceAll(MongoContentPattern, "$1");
 					useDsp = null; ////////////////////////////////////////////// add back when OSGI is figured out

@@ -19,31 +19,19 @@ package com.pentaho.oem.sk.nocode;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringReader;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-//import java.nio.file.Files;
-//import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.parsers.SAXParser;
 
 import mondrian.olap.Util;
 import mondrian.spi.impl.FilterDynamicSchemaProcessor;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.core.system.StandaloneSession;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;
@@ -51,23 +39,11 @@ import org.springframework.security.context.SecurityContext;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.context.SecurityContextImpl;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.xml.sax.InputSource;
-
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.sax.SAXSource;
-
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
-import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
@@ -94,6 +70,7 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 		return filter(before);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String filter(String before){
 		commonRoutines = new NoCodeCommon();
 		PropertiesConfiguration config;
@@ -155,8 +132,6 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 					///     Add Sql to tables defined in the cube
 					List <Element> tables = cube.selectNodes(".//Table");
 					for (Element table : tables){
-						String tableName = table.attributeValue("name");
-						String tablePropBase = schemaName + "." + cubeName + "." + tableName;
 						addSqlToTable(table,cubeName,schemaName);
 					}
 
@@ -260,8 +235,6 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 
-		Charset encoding = Charset.defaultCharset();
-		byte[] encoded;
 		try {
 //			encoded = Files.readAllBytes(Paths.get(path));
 //			String before = encoding.decode(ByteBuffer.wrap(encoded)).toString();

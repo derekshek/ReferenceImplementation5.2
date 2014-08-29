@@ -17,20 +17,12 @@
 package com.pentaho.oem.sk.userrole.ktr;
 
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.net.URL;
-import java.net.URLConnection;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
@@ -44,20 +36,16 @@ import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.security.userroledao.service.UserRoleDaoUserRoleListService;
 import org.pentaho.platform.plugin.services.security.userrole.PentahoCachingUserDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.AuthenticationServiceException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.userdetails.User;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 
 import com.pentaho.oem.sk.OEMUtil;
-import com.pentaho.oem.sk.userrole.webservice.OEMWebServiceUserDetailsService;
 
 public class OEMKTRUserRoleListService  implements IUserRoleListService, InitializingBean {
 

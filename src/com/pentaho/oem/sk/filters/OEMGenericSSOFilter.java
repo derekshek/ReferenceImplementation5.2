@@ -31,14 +31,9 @@ package com.pentaho.oem.sk.filters;
  */
 
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.util.Map;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -51,8 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -63,14 +56,8 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.event.authentication.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.providers.AuthenticationProvider;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
-import org.springframework.security.ui.AuthenticationDetailsSource;
 import org.springframework.security.ui.AuthenticationEntryPoint;
-import org.springframework.security.ui.FilterChainOrder;
-import org.springframework.security.ui.SpringSecurityFilter;
-import org.springframework.security.ui.WebAuthenticationDetailsSource;
 import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
-import org.springframework.util.Assert;
-
 import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
 //import org.pentaho.platform.web.http.*;
 /**

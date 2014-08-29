@@ -39,12 +39,9 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.core.row.*;
 import org.springframework.security.context.SecurityContextHolder;
 
-import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
-import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
 
 
-@SuppressWarnings("deprecation")
 public class OEMKTRSetSessionVarsComponent extends ComponentBase {
 
 	private static final long serialVersionUID = 9050456842938084174L;

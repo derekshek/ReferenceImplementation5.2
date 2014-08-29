@@ -38,7 +38,6 @@ import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.Authentication;
 import org.springframework.security.AuthenticationException;
-import org.springframework.security.AuthenticationManager;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.AuthenticationProvider;
 import org.springframework.security.userdetails.UserDetails;
@@ -124,6 +123,7 @@ public class OEMAuthenticationProvider implements InitializingBean, Authenticati
 	}
 	
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean supports(Class clazz) {
 		return (OEMAuthenticationToken.class.isAssignableFrom(clazz));

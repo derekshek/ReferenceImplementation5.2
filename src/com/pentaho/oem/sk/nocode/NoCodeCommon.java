@@ -56,6 +56,7 @@ public class NoCodeCommon {
 
 	
 	// Get one or more properties values, ensuring a String array (or null)
+	@SuppressWarnings("rawtypes")
 	public String[] getProperties(String propBase, String directive){
 		String[] roleList = null;
 		Object roleString = configuration.getProperty(propBase + directive);

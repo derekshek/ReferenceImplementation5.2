@@ -78,7 +78,6 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	 @Override
 	  public RepositoryFile createUserHomeFolder(ITenant theTenant, String username) {
 	    RepositoryFile userHomeFolder = null;
-	    RepositoryFile appFolder = null;
 	    RepositoryFile tenantParentFolder = null;
 	    RepositoryFile tenantSubFolder = null;
 
@@ -110,7 +109,7 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 
 		///////////////////////////////////////////  Create Tenant folder for Tenant users
 	    String tenantName = thisUser.getSessionVariable(tenantVar);
-	    if (tenantName == null && tenantName.length() == 0){
+	    if (tenantName == null || tenantName.length() == 0){
 	    	return userHomeFolder;
 	    }
 	    //////////// first make sure Tenant folder exists
@@ -132,7 +131,8 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	    if (tenantSubFolder == null){
 	    	LOG.warn("No  tenant folder (creating) "+ tenantName);
 	    	RepositoryFile newTenantFolder = new RepositoryFile.Builder(tenantName).folder(true).build();
-	    	appFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
+	    	RepositoryFile appFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
+	    	return appFolder;
 	    }
 	    
 	    /////////////  all done

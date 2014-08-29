@@ -10,8 +10,8 @@
 	<property file="build/build.properties" />
 	
 	<!-- Java Source -->
-	<property name="src"                 location="CommonSrc" />
-	<property name="customsrc"           location="CustomerSpecificSrc" />
+	<property name="src"                 location="src" />
+	<property name="customsrc"           location="CustomerSpecificSource" />
 
 	<!-- Resources uder res -->
 	<property name="res"                 location="res" />
@@ -20,18 +20,17 @@
 	<property name="res-pentaho-theme"   location="${res}/ConfigFiles-theming" />
 	<property name="publish"             location="${res}/ContentAndDatasources" />
 	<property name="setupScripts"        location="${res}/SetupScripts" />
-	<property name="topLevelFiles"       location="${res}/TopLevelFiles" />
 	<property name="updateJARS"          location="${res}/UpdateJARS" />
 
 	<!-- These should not change -->
-	<property name="classes"       location="classes" />
-	<property name="customclasses" location="customclasses" />
-	<property name="dist"          location="dist" />
-	<property name="lib"           location="lib" />
-	<property name="publish-content" location="${publish}/Content" />
-	<property name="publish-mondrian" location="${publish}/Mondrian" />
-	<property name="publish-metadata" location="${publish}/Metadata" />
-	<property name="publish-jdbc"     location="${publish}/JDBC" />
+	<property name="classes"                  location="classes" />
+	<property name="customclasses"            location="customclasses" />
+	<property name="dist"                     location="dist" />
+	<property name="lib"                      location="lib" />
+	<property name="publish-content"          location="${publish}/Content" />
+	<property name="publish-mondrian"         location="${publish}/Mondrian" />
+	<property name="publish-metadata"         location="${publish}/Metadata" />
+	<property name="publish-jdbc"             location="${publish}/JDBC" />
 	<property name="publish-content-post"     location="${publish}/Content-post" />
 
 
@@ -43,6 +42,8 @@
 		<fileset dir="${pentaho-install}/${tomcat-lib}">
 			<include name="servlet-api.jar" />
 		</fileset>
+		  <pathelement path="${classes}"/>
+
 	</path>
 
 
@@ -75,7 +76,13 @@
 			>
 			<classpath refid="compile.classpath" />
 		</javac>
+
 		<mkdir dir="${customclasses}" />
+		<javac srcdir="${customsrc}" destdir="${customclasses}" includeantruntime="false"
+			debug="true" debuglevel="lines,vars,source"
+			>
+			<classpath refid="compile.classpath" />
+		</javac>
 
 	</target>
 
@@ -86,6 +93,7 @@
 		<mkdir dir="${dist}/${server-name}" />
 		<mkdir dir="${dist}/${biserver-path}" />
 		<jar jarfile="${dist}/${pentaho-webapp-lib}/${dist-jar-name}.jar" basedir="${classes}" />
+		<jar jarfile="${dist}/${pentaho-webapp-lib}/${cust-jar-name}.jar" basedir="${customclasses}" />
 		
 		<!-- Configuration copy generic and version specific files -->
 		<copy todir="${dist}" overwrite="true">
@@ -99,22 +107,7 @@
 			</fileset>
 		</copy>
 			
-		<!-- Copy in the top level stuff (sample data, restartBA script ) -->
-		<copy todir="${dist}" overwrite="true">
-			<fileset dir="${topLevelFiles}">
-			   <include name="**/*"/>
-			</fileset>
-		</copy>
 
-
-		<!-- Get any system JARS we may modify -->
-		<antcall target="updateJars" />
-		<copy todir="${dist}" overwrite="true">
-			<fileset dir="${topLevelFiles}">
-			   <include name="**/*"/>
-			</fileset>
-		</copy>
-		
 
 		
         <!-- NoCodeDsp.properties is copied here  - these would normally be in res, but may be in src for testing reasons -->

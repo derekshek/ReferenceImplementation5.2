@@ -26,7 +26,6 @@ import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.plugin.services.security.userrole.PentahoCachingUserDetailsService;
 import org.springframework.security.AuthenticationServiceException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.context.SecurityContextHolder;
@@ -261,7 +260,6 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 //			LOG.debug("No session or security context. Ignore and move on."); //Swallow exception
 		}
 
-		String sql = getSqlRolesForUser();
 		
 		
 		//Call UserDetails Service to get the roles
