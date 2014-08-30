@@ -89,7 +89,7 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 
 	private ApplicationEventPublisher eventPublisher;
 
-	private boolean                  lenient = true;
+	private boolean                  lenient = false;
 	
 	
 ///////////////////////////////////////////////   Getters and Setters ///////////////////////////////////////////////
@@ -150,7 +150,9 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 					LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
 					// New for 5.0 -- this ensures the startup action gets called....
 					InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());
-					eventPublisher.publishEvent(event);
+					if (eventPublisher != null){
+						eventPublisher.publishEvent(event);
+					}
 				} catch (AuthenticationException ex) {
 					failure = ex;
 					LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
@@ -168,6 +170,10 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 	}
 
 	
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		 this.eventPublisher = eventPublisher;
+	}
 	
 	private boolean requiresAuthenication(String username) {
 		boolean required = false;
