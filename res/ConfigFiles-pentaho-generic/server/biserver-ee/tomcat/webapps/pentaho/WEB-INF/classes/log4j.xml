@@ -191,14 +191,12 @@
      </layout>
    </appender>
 
-<!--
    <category name="com.pentaho.oem">
       <priority value="DEBUG"/>
       <appender-ref ref="OEMLOG"/>
    </category>
-   -->
 
-   <category name="com.pentaho.example">
+   <category name="com.customerspecific">
       <priority value="DEBUG"/>
       <appender-ref ref="OEMLOG"/>
    </category>
