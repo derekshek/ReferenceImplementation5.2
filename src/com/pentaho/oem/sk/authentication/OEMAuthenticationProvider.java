@@ -40,16 +40,16 @@ import org.springframework.security.Authentication;
 import org.springframework.security.AuthenticationException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.AuthenticationProvider;
+import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 
 import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
-import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
 
 /**
- * Attempts to authenticate a {@link OEMAuthenticationToken}. The class
+ * Attempts to authenticate a {@link UsernamePasswordAuthenticationToken}. The class
  * interacts with a {@link #setServiceURL(String) parameterized URL} to retrieve
  * an input stream that provides the user's name and roles.
  */
@@ -77,17 +77,17 @@ public class OEMAuthenticationProvider implements InitializingBean, Authenticati
 
 	@Override
 	public Authentication authenticate(Authentication token) throws AuthenticationException {
-		OEMAuthenticationToken results = null;
+		UsernamePasswordAuthenticationToken results = null;
 
 		LOG.debug("authenticate");
 		if (supports(token.getClass())) {
-			results = executeService((OEMAuthenticationToken) token);
+			results = executeService((UsernamePasswordAuthenticationToken) token);
 		}
 		return results;
 	}
 
 
-	protected OEMAuthenticationToken executeService(OEMAuthenticationToken intoken) throws AuthenticationException {
+	protected UsernamePasswordAuthenticationToken executeService(UsernamePasswordAuthenticationToken intoken) throws AuthenticationException {
 		UserDetails details;
 
 
@@ -105,13 +105,14 @@ public class OEMAuthenticationProvider implements InitializingBean, Authenticati
 			details = new OEMUser(details);
 		}
 
-		OEMAuthenticationToken result = new OEMAuthenticationToken(intoken);
+		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
+				details.getUsername(),
+				intoken.getCredentials(),
+				details.getAuthorities());
 
-		result.setAuthenticated(true);
-		result.setPrincipal(details);
-		result.setAuthorities(details.getAuthorities());
-		result.setName(details.getUsername());
+//		result.setAuthenticated(true);
 		result.setDetails(details);
+		String foo = result.getName();
 		IPentahoSession session = PentahoSessionHolder.getSession();
 		LOG.debug("setting in the session " + session);
 		for (String var : ((OEMUser)details).getSessionVariables()){
@@ -126,7 +127,7 @@ public class OEMAuthenticationProvider implements InitializingBean, Authenticati
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean supports(Class clazz) {
-		return (OEMAuthenticationToken.class.isAssignableFrom(clazz));
+		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(clazz));
 	}
 
 }

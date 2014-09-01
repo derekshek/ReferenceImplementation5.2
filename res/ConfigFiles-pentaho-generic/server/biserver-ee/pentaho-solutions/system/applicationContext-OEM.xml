@@ -50,8 +50,7 @@
         <property name="overrideAuthenticationProvider">
             <ref bean="oemAuthenticationProvider" />
         </property>
-        -->
-   
+        --> 
         <property name="filterHelper">
             <ref bean="ssoFilterHelper" />
         </property>

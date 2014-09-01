@@ -34,6 +34,7 @@ package com.pentaho.oem.sk.filters;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -52,16 +53,17 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.Authentication;
 import org.springframework.security.AuthenticationException;
 import org.springframework.security.AuthenticationManager;
+import org.springframework.security.BadCredentialsException;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.event.authentication.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.providers.AuthenticationProvider;
+import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
 import org.springframework.security.ui.AuthenticationEntryPoint;
 import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
-import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
-//import org.pentaho.platform.web.http.*;
+
 /**
- * The instance works by creating a {@link OEMAuthenticationToken} using the
+ * The instance works by creating a {@link UsernamePasswordAuthenticationToken} using the
  * secret value passed in a parameter on the URL.
  * 
  * <b>Secret Code Settings</b> By the default, the parameter name to contain the
@@ -88,29 +90,19 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 	private OEMFilterHelper          filterHelper = new OEMFilterHelper();
 
 	private ApplicationEventPublisher eventPublisher;
-
 	private boolean                  lenient = false;
 	
 	
 ///////////////////////////////////////////////   Getters and Setters ///////////////////////////////////////////////
 	public    AuthenticationProvider   getOverrideAuthenticationProvider() { return overrideAuthenticationProvider; }
-
 	public    void                     setOverrideAuthenticationProvider(AuthenticationProvider overrideAuthenticationProvider) { this.overrideAuthenticationProvider = overrideAuthenticationProvider; }
-
 	protected AuthenticationManager    getAuthenticationManager()          { return authenticationManager; }
-
 	public    void                     setAuthenticationManager(AuthenticationManager authenticationManager) { this.authenticationManager = authenticationManager; }
-
 	protected boolean                  isLenient()                         { return lenient; }
-
 	public    void                     setLenient(boolean lenient)         { this.lenient = lenient; }
-	
 	protected AuthenticationEntryPoint getAuthenticationEntryPoint()       { return authenticationEntryPoint; }
-
 	public    void                     setAuthenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) { this.authenticationEntryPoint = authenticationEntryPoint; }
-
 	public    OEMFilterHelper          getFilterHelper()                   { return filterHelper; }
-
 	public    void                     setFilterHelper(OEMFilterHelper filterHelper) { this.filterHelper = filterHelper; }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,38 +116,41 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		String secretValue = filterHelper.getToken(wrapper);
 		if (secretValue != null) {
 			LOG.debug("Found secret "+secretValue);
-			String username = filterHelper.resolveUsername(secretValue);
-			LOG.debug("Resolved to "+username);
-
-			if (username != null && requiresAuthenication(username)) {
-				OEMAuthenticationToken token;
-				Authentication authResult;
+			if (requiresAuthenication(secretValue)) {
 				LOG.debug("User Requires Authentication!");
+				String username = filterHelper.resolveUsername(secretValue);
+				LOG.debug("Resolved to "+username);
+				if (username == null){
+					failure = new BadCredentialsException("unable to resolve username into token");
+				}else{
+					UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, secretValue);
+					token.setDetails(authenticationDetailsSource.buildDetails(wrapper));
+					LOG.debug("done setting token!");
 
-				token = new OEMAuthenticationToken(username);
-				token.setDetails(authenticationDetailsSource.buildDetails(wrapper));
-				LOG.debug("done setting token!");
-				
-				try {
-					if (overrideAuthenticationProvider != null){
-						LOG.debug("calling authenticate with override authenticationProvider "+overrideAuthenticationProvider);
-						authResult = overrideAuthenticationProvider.authenticate(token);
-					}else{
-						LOG.debug("calling authenticate with default authenticationManager "+authenticationManager);
-						authResult = authenticationManager.authenticate(token);
+					try {
+						Authentication authResult;
+						if (overrideAuthenticationProvider != null){
+							LOG.debug("calling authenticate with override authenticationProvider "+overrideAuthenticationProvider);
+							authResult = overrideAuthenticationProvider.authenticate(token);
+						}else{
+							LOG.debug("calling authenticate with default authenticationManager "+authenticationManager);
+							authResult = authenticationManager.authenticate(token);
+						}
+						filterHelper.setSessionVariables(wrapper,authResult);
+						LOG.debug("Got authResult " + authResult);
+						SecurityContextHolder.getContext().setAuthentication(authResult);
+						LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
+						// New for 5.0 -- this ensures the startup action gets called....
+						InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());
+						if (eventPublisher != null){
+							eventPublisher.publishEvent(event);
+						}
+					} catch (AuthenticationException ex) {
+						failure = ex;
+						LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
+					} catch (Exception ex) {
+						LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
 					}
-					filterHelper.setSessionVariables(wrapper,authResult);
-					LOG.debug("Got authResult " + authResult);
-					SecurityContextHolder.getContext().setAuthentication(authResult);
-					LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
-					// New for 5.0 -- this ensures the startup action gets called....
-					InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());
-					if (eventPublisher != null){
-						eventPublisher.publishEvent(event);
-					}
-				} catch (AuthenticationException ex) {
-					failure = ex;
-					LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -175,16 +170,16 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		 this.eventPublisher = eventPublisher;
 	}
 	
-	private boolean requiresAuthenication(String username) {
+	private boolean requiresAuthenication(String secretValue) {
 		boolean required = false;
 		Authentication existing = SecurityContextHolder.getContext().getAuthentication();
 
-		if ((existing == null) || !existing.isAuthenticated() || (username == null)) {
+		if ((existing == null) || !existing.isAuthenticated() || (secretValue == null)) {
 			required = true;
 		}
 
-		if (!required && (existing instanceof OEMAuthenticationToken)) {
-			required =  !((OEMAuthenticationToken) existing).getCredentials().equals(username);
+		if (!required && (existing instanceof UsernamePasswordAuthenticationToken)) {
+			required =  !((UsernamePasswordAuthenticationToken) existing).getCredentials().equals(secretValue);
 		}
 
 		if (existing instanceof AnonymousAuthenticationToken) {
