@@ -41,6 +41,7 @@ import org.springframework.security.AuthenticationException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.AuthenticationProvider;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.providers.dao.DaoAuthenticationProvider;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
@@ -54,26 +55,26 @@ import com.pentaho.oem.sk.OEMUtil;
  * an input stream that provides the user's name and roles.
  */
 
-public class OEMAuthenticationProvider implements InitializingBean, AuthenticationProvider {
+public class OEMAuthenticationProvider extends DaoAuthenticationProvider {
 
 	private static final Log LOG = LogFactory.getLog(OEMAuthenticationProvider.class);
 	
-	private UserDetailsService userDetailsService;
-
-	public void setUserDetailsService(UserDetailsService s){
-		LOG.debug("settng userdetails service to "+s);
-		this.userDetailsService = s;
-	}
-
-	public UserDetailsService getUserDetailsService(){
-		return userDetailsService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		LOG.debug("Properties are set");
-		Assert.notNull(userDetailsService);
-	}
+//	private UserDetailsService userDetailsService;
+//
+//	public void setUserDetailsService(UserDetailsService s){
+//		LOG.debug("settng userdetails service to "+s);
+//		this.userDetailsService = s;
+//	}
+//
+//	public UserDetailsService getUserDetailsService(){
+//		return userDetailsService;
+//	}
+//
+//	@Override
+//	public void doAfterPropertiesSet() throws Exception {
+//		LOG.debug("Properties are set");
+//		Assert.notNull(userDetailsService);
+//	}
 
 	@Override
 	public Authentication authenticate(Authentication token) throws AuthenticationException {
@@ -97,8 +98,8 @@ public class OEMAuthenticationProvider implements InitializingBean, Authenticati
 			user.addRole(OEMUtil.PENTAHOAUTH);
 			details = user;
 		}else{
-			LOG.debug("calling loadUserByUsername " + intoken.getName() + " using " + userDetailsService);
-			details = userDetailsService.loadUserByUsername(intoken.getName());
+			LOG.debug("calling loadUserByUsername " + intoken.getName() + " using " + getUserDetailsService());
+			details = getUserDetailsService().loadUserByUsername(intoken.getName());
 		}
 		
 		if (!(details instanceof OEMUser)){

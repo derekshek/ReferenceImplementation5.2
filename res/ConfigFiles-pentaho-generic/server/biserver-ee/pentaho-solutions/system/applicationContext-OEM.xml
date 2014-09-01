@@ -46,7 +46,7 @@
         <property name="authenticationManager">
             <ref bean="authenticationManager" />
         </property>
-        <!--
+        <!--  Do not use this property - it will not work currently 
         <property name="overrideAuthenticationProvider">
             <ref bean="oemAuthenticationProvider" />
         </property>
