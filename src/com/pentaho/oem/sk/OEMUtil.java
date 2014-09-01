@@ -42,28 +42,6 @@ public class OEMUtil {
 
 	private static final Log LOG = LogFactory.getLog(OEMUtil.class);
 
-	public static User getCurrentUser() {
-		Object principal;
-
-		if (SecurityContextHolder.getContext() == null
-				|| SecurityContextHolder.getContext().getAuthentication() == null
-				|| (principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal()) == null) {
-			// LOG.debug("No principal");
-			return null;
-		}
-//		return principal;
-//		if (principal instanceof OEMUser) {
-//			return (OEMUser) principal;
-//		}
-		if (principal instanceof User) {
-			return new OEMUser((User)principal);
-		}
-//		// We should never get here if SSO is used
-//		LOG.warn("Some other principal "
-//				+ SecurityContextHolder.getContext().getAuthentication());
-		return null;
-	}
-
 	/**
 	 * Get Connection
 	 * @param dataSourceName - the JNDI name of the connection

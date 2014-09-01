@@ -55,13 +55,7 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 			RepositoryFileAcl acl, 
 			IPentahoSession session) {
 
-		User user = OEMUtil.getCurrentUser();
-
-		if (user == null){
-			LOG.debug("No OEMUser authentication/authorities");
-			return true;
-		}
-		
+	
 		// Get the content request path - turn into array
 		String[] topLevelDirs = getTopLevelDirNames(file);
 		if (topLevelDirs == null || topLevelDirs.length < 2){

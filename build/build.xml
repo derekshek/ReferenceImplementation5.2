@@ -167,10 +167,10 @@
 		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_MEASURES@@@</replacetoken>
 		</replace>
 		<replace dir="${dist}" value="${oem-analyzer-layout-rows-color}" excludes="*jar" includes="**/*.css" >
-		    <replacetoken>@@@OEM_ANALYZER_LAYOUT_ROWS_COLOR@@@;</replacetoken>
+		    <replacetoken>@@@OEM_ANALYZER_LAYOUT_ROWS_COLOR@@@</replacetoken>
 		</replace>
 		<replace dir="${dist}" value="${oem-page-background}" excludes="*jar" includes="**/*.css" >
-		    <replacetoken>@@@OEM_PAGE_BACKGROUND@@@;</replacetoken>
+		    <replacetoken>@@@OEM_PAGE_BACKGROUND@@@</replacetoken>
 		</replace>
 		<replace dir="${dist}" value="${oem-file-button-background}" excludes="*jar" includes="**/*.css" >
 		    <replacetoken>@@@OEM_FILE_BROWSER_BUTTON_COLOR_BG@@@</replacetoken>
@@ -181,12 +181,15 @@
 	</target>
 	
 	<!-- Deploy -->
-	<target name="deploy" depends="dist">
+	<target name="deployNoRestart" depends="dist">
 			<copy todir="${pentaho-install}" overwrite="true">
 			 <fileset dir="${dist}">
 			 </fileset>
 			</copy>
 		
+	</target>
+
+	<target name="deploy" depends="deployNoRestart">
 		<exec executable="${pentaho-install}/restartBA" /> 
 	</target>
 

@@ -121,8 +121,8 @@ public class OEMUser extends User {
 		return false;
 	}
 
-	public boolean isAdmin(String appName) {
-		return hasRole(appName + "-" + OEMUtil.PENTAHOADMIN);
+	public boolean isAdmin(String tenantName) {
+		return hasRole(tenantName + "-" + OEMUtil.PENTAHOADMIN);
 	}
 
 }
