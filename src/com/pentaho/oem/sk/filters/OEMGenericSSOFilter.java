@@ -43,6 +43,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -117,6 +118,11 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		if (secretValue != null) {
 			LOG.debug("Found secret "+secretValue);
 			if (requiresAuthenication(secretValue)) {
+//				SecurityContextHolder.clearContext();
+//				HttpSession session = request.getSession(false);
+//				if (session != null) {
+//		            session.invalidate();
+//		        }
 				LOG.debug("User Requires Authentication!");
 				String username = filterHelper.resolveUsername(secretValue);
 				LOG.debug("Resolved to "+username);
@@ -138,7 +144,7 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 						}
 						filterHelper.setSessionVariables(wrapper,authResult);
 						LOG.debug("Got authResult " + authResult);
-						SecurityContextHolder.getContext().setAuthentication(authResult);
+						SecurityContextHolder.getContext().setAuthentication(authResult); 
 						LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
 						// New for 5.0 -- this ensures the startup action gets called....
 						InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());

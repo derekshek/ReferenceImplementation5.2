@@ -1,0 +1,143 @@
+<head><title>testing</title></head>
+    <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+var SERVER_BASE = "http://localhost:8080/pentaho/";
+</script>
+<body onload="document.getElementById('myframe').src= SERVER_BASE + 'welcome/status.jsp'">
+<form>
+
+<script type="text/javascript">
+
+function getFiles(dir,user,divobject,title,frameObject,div){
+	var path = ":"+dir+":";
+    $.ajax({
+        url: SERVER_BASE + "api/repo/files/"+path+"/tree?depth=5&secret="+user,
+        headers: {"Accept": "application/json"},
+        asynch:false
+      })
+      .done(function (data){
+        //object.innerHTML =  
+        	jsonFilesToList(data,title,frameObject,divobject);
+      }) 
+      .fail(function (){
+        return ("// API call failed")
+      });
+}
+
+function jsonFilesToList(data,title,frameObject,div){
+	var fileArray = data.children;
+	if (fileArray == null || typeof fileArray == 'undefined' || fileArray.length < 1){
+		return "no files returned";
+	}
+	var header = document.createElement("div");
+	header.id = title;
+	header.innerHTML = title;
+	div.innerHTML = "";
+	div.appendChild(header);
+
+	for (var i = 0; i < fileArray.length; i++){
+        var fileDiv = document.createElement("div");
+		var file = fileArray[i].file;
+		var filename = file.name;
+		if (file.folder == "true"){
+     	   fileDiv.setAttribute("id","repoDir");
+           var subdirDiv = document.createElement("div");
+           jsonFilesToList(fileArray[i],file.title,frameObject,subdirDiv);
+           fileDiv.appendChild(subdirDiv);
+		}else{
+		   var filepath = SERVER_BASE + "api/repos/" + pathToId(file.path);
+		   filepath = addExtension(filepath);
+		   filepath = addTimestamp(filepath);
+		   a = document.createElement('a');
+		   a.href="javascript:void(0)";
+		   a.innerHTML = file.title;
+		   a.setAttribute("onClick","document.getElementById('myframe').src='"+filepath +"'");
+
+     	   header.id = title;
+     	   fileDiv.setAttribute("id","repoFile");
+		   fileDiv.appendChild(a);
+		}
+		div.appendChild(fileDiv);
+	}
+}
+
+function pathToId(path) {
+    var id = path.replace(/\//g, ":");
+    id = id.replace(/#/g, "%23");
+    id = id.replace(/\{/g, "%7B");
+    id = id.replace(/\}/g, "%7D");
+    id = id.replace(/</g, "%3C");
+    id = id.replace(/>/g, "%3E");
+    id = id.replace(/\+/g, "%2B");
+    
+    if (id.indexOf(":") != 0) {
+      id = ":" + id;
+    }
+    if (id.indexOf(":", id.length -1) == 0){
+      id = id.substring(0, id.length() - 2);
+    }
+    return id;
+  }
+
+function addExtension(path){
+	var n = path.lastIndexOf(".");
+	var action = "generatedContent";
+	var ext = path.substring(n+1);
+	switch (ext){
+	case "xanalyzer" : action = "viewer";     break;  // could be editor
+	case "prpt"      : action = "viewer";     break;  // could be generatedContent
+	case "prpti"     : action = "prpti.view"; break;  
+	}
+	return path + "/" + action;
+}
+
+function addTimestamp(p){
+	return p + "?ts=" + (new Date).getTime();
+}
+
+function refreshMenus(user){
+//	getFiles("Tenants",user, document.getElementById("tenanttree"),"My Tenant",document.getElementById("myframe"));
+//	getFiles("OEMUtils",user, document.getElementById("oemtree"),"OEM Utils",document.getElementById("myframe"));
+	getFiles("public",user, document.getElementById("publictree"),"Public",document.getElementById("myframe"));
+}
+</script>
+
+
+
+Change local user to: 
+<select id="userDropdown">
+   <option value="sean">sean</option>
+   <option value="beavis">beavis</option>
+   <option value="suzy">suzy</option>
+   <option value="admin">admin</option>
+</select>
+<input type="button" value="Change Portal User" onClick="var e=document.getElementById('userDropdown'); 
+                                                         var selectedUser = e.options[e.selectedIndex].value; 
+                                                         document.getElementById('myframe').src=SERVER_BASE + '/welcome/status.jsp?secret='+ selectedUser;
+                                                         refreshMenus(selectedUser);
+                                                         "">
+ <br>
+<input type="button" value="API call Only" onClick="var e=document.getElementById('userDropdown'); 
+                                                         var selectedUser = e.options[e.selectedIndex].value; 
+                                                         refreshMenus(selectedUser);
+                                                         "">
+<input type="button" value="Logout the current user" onClick="document.getElementById('myframe').src=SERVER_BASE + 'Logout'">
+</form>
+<br>
+<table border=0>
+<tr valign=top>
+  <td width=300px>
+  <div id="tenanttree"></div>
+  <div id="oemtree"></div>
+  <div id="publictree"></div>
+  </td>
+  <td width=900px>
+  <iframe id="myframe" height="600px" width="100%" src="">
+  </iframe>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

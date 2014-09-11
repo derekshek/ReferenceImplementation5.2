@@ -213,13 +213,26 @@
 				   </fileset>
 		 </apply>
 	</target>
-
 	
 	
 	<!--  Publish Content to repository -->
 	<target name="publish" depends="publishContent,publishMondrian,publishMetadata" />
 
 	<target name="publishContent">
+	    <!-- Copy to tmp dir for string substitution -->
+		<mkdir dir="${publish-content}/tmp" />
+		<copy todir="${publish-content}/tmp" overwrite="true">
+			<fileset dir="${publish-content}">
+			   <include name="**/*"/>
+			</fileset>
+		</copy>
+
+	    <!-- perform string substitution -->
+		<replace dir="${publish-content}/tmp" value="${pentaho-install}" excludes="*jar" >
+		    <replacetoken>@@@PENTAHO_HOME@@@</replacetoken>
+		</replace>
+		
+	    <!-- Now publish -->
 		 <apply executable="${pentaho-install}/${biserver-path}/import-export.sh" addsourcefile="true" relative="false" > 
 		 	<mapper type="regexp" from="^(.*)/[^/]*" to="/\1" />
 		 	<arg value="--file-path"/>
@@ -234,7 +247,7 @@
 		 	<arg value="--retainOwnership=true"/>
 		 	<arg value="--permission=true"/>
 		 	
-		    <fileset dir="${publish-content}" casesensitive="yes">
+		    <fileset dir="${publish-content}/tmp" casesensitive="yes">
 		      <include name="**/*"/>
 		    </fileset>
 		  </apply>

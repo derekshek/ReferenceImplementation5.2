@@ -111,9 +111,7 @@ public class OEMAuthenticationProvider extends DaoAuthenticationProvider {
 				intoken.getCredentials(),
 				details.getAuthorities());
 
-//		result.setAuthenticated(true);
 		result.setDetails(details);
-		String foo = result.getName();
 		IPentahoSession session = PentahoSessionHolder.getSession();
 		LOG.debug("setting in the session " + session);
 		for (String var : ((OEMUser)details).getSessionVariables()){

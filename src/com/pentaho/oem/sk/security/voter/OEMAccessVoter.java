@@ -96,6 +96,7 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 	protected String[] getTopLevelDirNames(RepositoryFile f){
 
 		String fullpath = f.getPath();
+		LOG.debug("File is "+fullpath);
 		if (fullpath != null){
 			String [] dirs = fullpath.split("/");
 			return dirs;
