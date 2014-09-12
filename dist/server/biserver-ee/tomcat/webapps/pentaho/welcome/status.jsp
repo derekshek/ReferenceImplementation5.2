@@ -1,7 +1,7 @@
 <%@ page import="java.util.Arrays,java.util.ArrayList,java.util.Collections,java.util.Set,java.util.List,java.util.Map,java.util.HashMap,org.springframework.security.context.SecurityContextHolder,org.springframework.security.GrantedAuthority,org.springframework.security.GrantedAuthorityImpl,org.springframework.security.providers.UsernamePasswordAuthenticationToken,org.springframework.security.*;" %>
 <html>
  <head></head>
- <body bgcolor="#e0ffe0">
+ <body bgcolor="#f7fff7">
 
 <%
 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -11,8 +11,8 @@ String name      = authentication.getName();
 
 %>
 <h1>Logged into Pentaho as <%=name%></h1>
-  <table border="true" bgcolor="white">
-  <tr bgcolor="darkgreen" ><th colspan=2>Your Session Variables are</th></tr>
+  <table border="true" bgcolor="#d0e0d0">
+  <tr bgcolor="#c0d0c0" ><th colspan=2>Your Session Variables are</th></tr>
     <%
     HttpSession httpSession = request.getSession();
 
@@ -31,7 +31,7 @@ String name      = authentication.getName();
 
      GrantedAuthority[] authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 %>
-     <tr bgcolor="darkgreen" ><th colspan=2>Your Roles Are:</th></tr>
+     <tr bgcolor="#c0d0c0" ><th colspan=2>Your Roles Are:</th></tr>
 <%
       for(GrantedAuthority authority : authorities){
          String roleval = (authority != null) ? authority.toString() : "null";

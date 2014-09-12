@@ -53,7 +53,7 @@ html, body {
   padding: 0px;
   font-family:  OpenSansRegular, sans-serif;
   font-size: 14px;
-  background: transparent;
+  background: @@@OEM_PAGE_BACKGROUND@@@;
   color: #26363d;
 }
 
@@ -3501,7 +3501,7 @@ background-color: #d7e9cd;
   /* report tab bg change  */
 .dj_contentbox .pentaho-page-background{
   background: transparent;
-  background-color: #FFF;
+  background-color: @@@OEM_PAGE_BACKGROUND@@@;
 }
   /* report viewer  */
 .styled >* #reportControlPanel,

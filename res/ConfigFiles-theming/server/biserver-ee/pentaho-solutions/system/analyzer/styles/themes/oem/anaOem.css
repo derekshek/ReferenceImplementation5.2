@@ -175,7 +175,7 @@ div.active {
 
 /* Report summary bar */
 .reportSummary {
-  background-color: #FFF;
+  background-color: @@@OEM_PAGE_BACKGROUND@@@;
   border-top: 0px solid #abc9d9;
   border-bottom: 1px solid #abc9d9;
   font-size: 13px;
@@ -315,7 +315,7 @@ div.active {
 }
 
 .reportArea {
-  background-color: #fff;
+  background-color: @@@OEM_PAGE_BACKGROUND@@@;
 }
 
 .reportArea .reportEmpty, .reportArea .noData {

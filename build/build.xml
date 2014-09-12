@@ -136,46 +136,46 @@
 			</fileset>
 		</copy>
 		<echo>Setting colors...</echo>
-		<replace dir="${dist}" value="${oem-color-1}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-color-1}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_COLOR_1@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-button-color}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-button-color}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_BUTTON_COLOR@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-button-color-2}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-button-color-2}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_BUTTON_COLOR_2@@@</replacetoken>
 		</replace>
 
 
-		<replace dir="${dist}" value="${oem-button-focus-color}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-button-focus-color}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_BUTTON_FOCUS_COLOR@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-header-color}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-header-color}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_HEADER_COLOR_1@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-header-color-1}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-header-color-1}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_HEADER_COLOR@@@</replacetoken>
 		</replace>
 
-		<replace dir="${dist}" value="${oem-analyzer-header-color-1}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-analyzer-header-color-1}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_1@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-analyzer-header-color-2}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-analyzer-header-color-2}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_2@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-analyzer-header-color-measures}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-analyzer-header-color-measures}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_ANALYZER_HEADER_COLOR_MEASURES@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-analyzer-layout-rows-color}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-analyzer-layout-rows-color}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_ANALYZER_LAYOUT_ROWS_COLOR@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-page-background}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-page-background}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_PAGE_BACKGROUND@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-file-button-background}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-file-button-background}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_FILE_BROWSER_BUTTON_COLOR_BG@@@</replacetoken>
 		</replace>
-		<replace dir="${dist}" value="${oem-file-button-foreground}" excludes="*jar" includes="**/*.css" >
+		<replace dir="${dist}" value="${oem-file-button-foreground}" excludes="*jar" includes="**/*.css **/*html **/*jsp" >
 		    <replacetoken>@@@OEM_FILE_BROWSER_BUTTON_COLOR_FG@@@</replacetoken>
 		</replace>
 	</target>
@@ -184,12 +184,19 @@
 	<target name="deployNoRestart" depends="dist">
 			<copy todir="${pentaho-install}" overwrite="true">
 			 <fileset dir="${dist}">
+			   <include name="**/*"/>
+			   <exclude name="**/*jar"/>
 			 </fileset>
 			</copy>
 		
 	</target>
 
 	<target name="deploy" depends="deployNoRestart">
+		<copy todir="${pentaho-install}" overwrite="true">
+		 <fileset dir="${dist}">
+			   <include name="**/*jar"/>
+		 </fileset>
+		</copy>
 		<exec executable="${pentaho-install}/restartBA" /> 
 	</target>
 

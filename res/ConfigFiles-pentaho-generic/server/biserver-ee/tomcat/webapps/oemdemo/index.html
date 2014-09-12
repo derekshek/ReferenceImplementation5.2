@@ -2,16 +2,16 @@
 
 <style>
 body {
-    background-color: #e0ffe0;
+    background-color: @@@OEM_PAGE_BACKGROUND@@@;
 }
 .headersection {
-    background-color: #004000;
+    background-color: @@@OEM_COLOR_1@@@;
     color: yellow;
     margin-left: 0px;
 } 
 
 .repoDir {
-   background-color: #004000;
+   background-color: @@@OEM_BUTTON_COLOR@@@;
    color: yellow;
 }
 .repoSubdir {
@@ -20,7 +20,7 @@ body {
 }
 
 .repoFile {
-   background-color: #ffff00;
+   background-color: @@@OEM_HEADER_COLOR@@@;
 }
 
 .repoFile a:link{
@@ -28,7 +28,7 @@ body {
    text-decoration: none;
 }
 .repoFile a:hover{
-   background-color: white;
+   background-color: @@@OEM_BUTTON_COLOR_1@@@;
    color: green;
    text-decoration: none;
 }
@@ -149,6 +149,7 @@ function refreshMenus(user){
 
 
 <div class="headersection">
+<img src="http://localhost:8080/pentaho/content/common-ui/resources/themes/oem/images/oem-puc-login-logo.png"><br>
 Change local user to: 
 <select id="userDropdown">
    <option value="sean">sean</option>
