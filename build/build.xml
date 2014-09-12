@@ -5,6 +5,7 @@
     </description>
 
 	<echo message="Start the build!!!...." />
+    <property name="version.required" value="1.8" />
 
 	<!-- Read Properties file and set global props -->
 	<property file="build/build.properties" />
@@ -55,7 +56,7 @@
 	 -->
 	
 	
-	<target name="install" depends="clean,setup,publish,deploy" />
+	<target name="install" depends="version_check,clean,setup,publish,deploy" />
 	
 	
 	
@@ -364,6 +365,24 @@
 		<delete dir="${customclasses}" />
 		<delete dir="${dist}" />
 	</target>
+
+
+<target name="version_check">
+    <antversion property="version.running" />
+    <fail message="FATAL ERROR:  The running Ant version, ${version.running}, is too old.">
+        <condition>
+            <not>
+                <antversion atleast="${version.required}" />
+            </not>
+        </condition>
+    </fail>
+    <exec executable="curl"  failonerror="true">
+				 	<arg value="--version" />
+	</exec>
+    <exec executable="bash"  failonerror="true">
+				 	<arg value="--version" />
+	</exec>
+</target>
 
 	
 </project>
