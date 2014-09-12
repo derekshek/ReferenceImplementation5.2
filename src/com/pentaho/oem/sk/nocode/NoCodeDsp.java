@@ -218,9 +218,9 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 	}
 
 	public static void main (String[] args){
-		String path = "/home/kevinh/pentaho/Projects/Curaspan/schema.xml";
+		String path = "/home/kevinh/pentaho/Projects/ServiceMaster/dispatch.xml";
 		IPentahoSession session = new org.pentaho.platform.engine.core.system.StandaloneSession();
-		session.setAttribute("ORGID", "12345");
+//		session.setAttribute("ORGID", "12345");
 //		session.setAttribute("PayerList", "p1,p2,p3,p4");
 //		session.setAttribute("OrganizationList", "o1,o2,o3,o4");
 //		session.setAttribute("LocationList", "l1,l2,l3,l4");
@@ -229,7 +229,7 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 		
 		SecurityContext context = new SecurityContextImpl();
 		LinkedList<GrantedAuthority> roleList = new LinkedList<GrantedAuthority>();
-		roleList.add(new GrantedAuthorityImpl("Foo"));
+		roleList.add(new GrantedAuthorityImpl("BSC"));
 		roleList.add(new GrantedAuthorityImpl("Pentaho_PayerData"));
 		Authentication authentication = new UsernamePasswordAuthenticationToken("test", "test", roleList.toArray(new GrantedAuthority[0]));
 		context.setAuthentication(authentication);

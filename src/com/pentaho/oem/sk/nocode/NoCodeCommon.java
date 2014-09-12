@@ -131,6 +131,8 @@ public class NoCodeCommon {
 //						LOG.debug("No session var and NOVARSEEALL is not true - user will see nothing");
 					}
 				}
+			}else{
+				newClause = sql;
 			}
 			if (newClause != null){
 				newClauses.add(" ( " + newClause + " ) "  );

@@ -1,4 +1,47 @@
-<head><title>testing</title></head>
+<head>
+
+<style>
+body {
+    background-color: #e0ffe0;
+}
+.headersection {
+    background-color: #004000;
+    color: yellow;
+    margin-left: 0px;
+} 
+
+.repoDir {
+   background-color: #004000;
+   color: yellow;
+}
+.repoSubdir {
+   text-indent: 25px;
+   opacity: 0.9;
+}
+
+.repoFile {
+   background-color: #ffff00;
+}
+
+.repoFile a:link{
+   color: green;
+   text-decoration: none;
+}
+.repoFile a:hover{
+   background-color: white;
+   color: green;
+   text-decoration: none;
+}
+
+iframe{
+    background-color: transparent;
+    border: 0px none transparent;
+    padding: 0px;
+    overflow: hidden;
+}
+</style>
+
+<title>testing</title></head>
     <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -31,6 +74,7 @@ function jsonFilesToList(data,title,frameObject,div){
 		return "no files returned";
 	}
 	var header = document.createElement("div");
+    header.setAttribute("class","repoDir");
 	header.id = title;
 	header.innerHTML = title;
 	div.innerHTML = "";
@@ -41,8 +85,8 @@ function jsonFilesToList(data,title,frameObject,div){
 		var file = fileArray[i].file;
 		var filename = file.name;
 		if (file.folder == "true"){
-     	   fileDiv.setAttribute("id","repoDir");
            var subdirDiv = document.createElement("div");
+           subdirDiv.setAttribute("class","repoSubdir");
            jsonFilesToList(fileArray[i],file.title,frameObject,subdirDiv);
            fileDiv.appendChild(subdirDiv);
 		}else{
@@ -55,7 +99,7 @@ function jsonFilesToList(data,title,frameObject,div){
 		   a.setAttribute("onClick","document.getElementById('myframe').src='"+filepath +"'");
 
      	   header.id = title;
-     	   fileDiv.setAttribute("id","repoFile");
+     	   fileDiv.setAttribute("class","repoFile");
 		   fileDiv.appendChild(a);
 		}
 		div.appendChild(fileDiv);
@@ -97,14 +141,14 @@ function addTimestamp(p){
 }
 
 function refreshMenus(user){
-//	getFiles("Tenants",user, document.getElementById("tenanttree"),"My Tenant",document.getElementById("myframe"));
-//	getFiles("OEMUtils",user, document.getElementById("oemtree"),"OEM Utils",document.getElementById("myframe"));
+	getFiles("Tenants",user, document.getElementById("tenanttree"),"My Tenant",document.getElementById("myframe"));
+	getFiles("OEMUtils",user, document.getElementById("oemtree"),"OEM Utils",document.getElementById("myframe"));
 	getFiles("public",user, document.getElementById("publictree"),"Public",document.getElementById("myframe"));
 }
 </script>
 
 
-
+<div class="headersection">
 Change local user to: 
 <select id="userDropdown">
    <option value="sean">sean</option>
@@ -117,14 +161,18 @@ Change local user to:
                                                          document.getElementById('myframe').src=SERVER_BASE + '/welcome/status.jsp?secret='+ selectedUser;
                                                          refreshMenus(selectedUser);
                                                          "">
- <br>
+<input type="button" value="Who am I?" onClick=" document.getElementById('myframe').src=SERVER_BASE + '/welcome/status.jsp';
+                                                         "">
 <input type="button" value="API call Only" onClick="var e=document.getElementById('userDropdown'); 
                                                          var selectedUser = e.options[e.selectedIndex].value; 
                                                          refreshMenus(selectedUser);
                                                          "">
 <input type="button" value="Logout the current user" onClick="document.getElementById('myframe').src=SERVER_BASE + 'Logout'">
-</form>
-<br>
+</form> 
+</div>
+
+<div class="rendersection">
+<!-- ********************************************************************************************************************** -->
 <table border=0>
 <tr valign=top>
   <td width=300px>
@@ -133,11 +181,11 @@ Change local user to:
   <div id="publictree"></div>
   </td>
   <td width=900px>
-  <iframe id="myframe" height="600px" width="100%" src="">
+  <iframe id="myframe" height="800px" width="1400px" src="">
   </iframe>
   </td>
 </tr>
 </table>
-
+</div>
 </body>
 </html>

@@ -126,13 +126,14 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	    ////////////  Create tenant subfolder if not exists
 	    try{
 	    	tenantSubFolder = repository.getFile("/" + tenantTop + "/" + tenantName);
+	    	if (tenantSubFolder == null){
+	    		LOG.warn("No  tenant folder (creating) "+ tenantName);
+	    		RepositoryFile newTenantFolder = new RepositoryFile.Builder(tenantName).folder(true).build();
+	    		RepositoryFile appFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
+	    		return appFolder;
+	    	}
 	    }catch (Exception e){
-	    }
-	    if (tenantSubFolder == null){
-	    	LOG.warn("No  tenant folder (creating) "+ tenantName);
-	    	RepositoryFile newTenantFolder = new RepositoryFile.Builder(tenantName).folder(true).build();
-	    	RepositoryFile appFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
-	    	return appFolder;
+	    	LOG.error("Error in subfolder creation: "+e);
 	    }
 	    
 	    /////////////  all done
