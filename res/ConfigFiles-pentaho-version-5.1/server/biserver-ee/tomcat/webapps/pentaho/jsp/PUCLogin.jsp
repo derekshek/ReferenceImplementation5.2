@@ -159,7 +159,7 @@
 <body class="pentaho-page-background">
 <div id="login-wrapper">
   <div id="login-background">
-    <div id="oemdemo" style="background-color:yellow; align: center;o"><a href="/oemdemo">OEM Embedded Example</a></div>
+    <div id="oemdemo" style="background-color:yellow; align: center;"><a href="/oemdemo">OEM Embedded Example</a></div>
 
     <div id="login-logo"></div>
     
