@@ -2,7 +2,7 @@
 
 <style>
 body {
-    background-color: #f7fff7;
+    background-color: #e7ffe7;
 }
 .headersection {
     background-color: darkgreen;
@@ -41,21 +41,17 @@ iframe{
 }
 </style>
 
-<title>testing</title></head>
+<title>OEM Reference Integration</title></head>
     <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 var SERVER_BASE = "http://localhost:8080/pentaho/";
-</script>
-<body onload="document.getElementById('myframe').src= SERVER_BASE + 'welcome/status.jsp'">
-<form>
 
-<script type="text/javascript">
 
-function getFiles(dir,user,divobject,title,frameObject,div){
+function getFiles(dir,divobject,title,frameObject,div){
 	var path = ":"+dir+":";
     $.ajax({
-        url: SERVER_BASE + "api/repo/files/"+path+"/tree?depth=5&secret="+user,
+        url: SERVER_BASE + "api/repo/files/"+path+"/tree?depth=5",
         headers: {"Accept": "application/json"},
         asynch:false
       })
@@ -140,14 +136,57 @@ function addTimestamp(p){
 	return p + "?ts=" + (new Date).getTime();
 }
 
-function refreshMenus(user){
-	getFiles("Tenants",user, document.getElementById("tenanttree"),"My Tenant",document.getElementById("myframe"));
-	getFiles("OEMUtils",user, document.getElementById("oemtree"),"OEM Utils",document.getElementById("myframe"));
-	getFiles("public",user, document.getElementById("publictree"),"Public",document.getElementById("myframe"));
+function refreshMenus(){
+	getFiles("Tenants", document.getElementById("tenanttree"),"My Tenant",document.getElementById("myframe"));
+	getFiles("OEMUtils", document.getElementById("oemtree"),"OEM Utils",document.getElementById("myframe"));
+	getFiles("public", document.getElementById("publictree"),"Public",document.getElementById("myframe"));
+}
+
+function clearMenus(){
+	document.getElementById("tenanttree").innerHTML="";
+	document.getElementById("oemtree").innerHTML="";
+	document.getElementById("publictree").innerHTML="";
+}
+
+
+function contentFrame(){
+	return document.getElementById('myframe');
+}
+
+function login(user){
+    $.ajax({
+        url: SERVER_BASE + "Home?secret="+user,
+        headers: {"Accept": "application/json"},
+        asynch:false
+      })
+      .done(function (data){
+        	refreshMenus();
+            contentFrame().src=SERVER_BASE + '/welcome/status.jsp?secret='+ user;
+      }) 
+      .fail(function (){
+        return ("// login failed")
+      });
+	
+}
+
+function logout(){
+    $.ajax({
+        url: SERVER_BASE + "Logout",
+        headers: {"Accept": "application/json"},
+        asynch:false
+      })
+      .done(function (data){
+        	clearMenus();
+            contentFrame().src=SERVER_BASE + '/welcome/status.jsp';
+      }) 
+      .fail(function (){
+        return ("// login failed")
+      });
+	
 }
 </script>
-
-
+ <body onload="contentFrame().src= SERVER_BASE + 'welcome/status.jsp';">
+<form>
 <div class="headersection">
 <img src="http://localhost:8080/pentaho/content/common-ui/resources/themes/oem/images/oem-puc-login-logo.png"><br>
 Change local user to: 
@@ -157,18 +196,13 @@ Change local user to:
    <option value="suzy">suzy</option>
    <option value="admin">admin</option>
 </select>
-<input type="button" value="Change Portal User" onClick="var e=document.getElementById('userDropdown'); 
+<input type="button" value="Login" onClick="var e=document.getElementById('userDropdown'); 
                                                          var selectedUser = e.options[e.selectedIndex].value; 
-                                                         document.getElementById('myframe').src=SERVER_BASE + '/welcome/status.jsp?secret='+ selectedUser;
-                                                         refreshMenus(selectedUser);
-                                                         "">
-<input type="button" value="Who am I?" onClick=" document.getElementById('myframe').src=SERVER_BASE + '/welcome/status.jsp';
-                                                         "">
-<input type="button" value="API call Only" onClick="var e=document.getElementById('userDropdown'); 
-                                                         var selectedUser = e.options[e.selectedIndex].value; 
-                                                         refreshMenus(selectedUser);
-                                                         "">
-<input type="button" value="Logout the current user" onClick="document.getElementById('myframe').src=SERVER_BASE + 'Logout'">
+                                                         login(selectedUser);
+                                                         ">
+<input type="button" value="Who am I?" onClick="contentFrame().src=SERVER_BASE + '/welcome/status.jsp'; ">
+<input type="button" value="Get Files" onClick="refreshMenus(); ">
+<input type="button" value="Logout"    onClick="logout()">
 </form> 
 </div>
 
@@ -182,7 +216,7 @@ Change local user to:
   <div id="publictree"></div>
   </td>
   <td width=900px>
-  <iframe id="myframe" height="800px" width="1400px" src="">
+  <iframe id="myframe" height="800px" width="1400px" src="" >
   </iframe>
   </td>
 </tr>

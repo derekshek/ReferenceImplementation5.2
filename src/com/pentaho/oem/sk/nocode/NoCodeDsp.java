@@ -218,9 +218,9 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 	}
 
 	public static void main (String[] args){
-		String path = "/home/kevinh/pentaho/Projects/ServiceMaster/dispatch.xml";
+		String path = "/home/kevinh/pentaho/Projects/Evalue/EvalueDataMartSchema.xml";
 		IPentahoSession session = new org.pentaho.platform.engine.core.system.StandaloneSession();
-//		session.setAttribute("ORGID", "12345");
+		session.setAttribute("bar", "12345");
 //		session.setAttribute("PayerList", "p1,p2,p3,p4");
 //		session.setAttribute("OrganizationList", "o1,o2,o3,o4");
 //		session.setAttribute("LocationList", "l1,l2,l3,l4");

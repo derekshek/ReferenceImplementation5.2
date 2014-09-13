@@ -1,7 +1,7 @@
 <%@ page import="java.util.Arrays,java.util.ArrayList,java.util.Collections,java.util.Set,java.util.List,java.util.Map,java.util.HashMap,org.springframework.security.context.SecurityContextHolder,org.springframework.security.GrantedAuthority,org.springframework.security.GrantedAuthorityImpl,org.springframework.security.providers.UsernamePasswordAuthenticationToken,org.springframework.security.*;" %>
 <html>
  <head></head>
- <body bgcolor="#f7fff7">
+ <body bgcolor="#e7ffe7">
 
 <%
 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
