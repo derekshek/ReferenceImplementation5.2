@@ -26,6 +26,8 @@ public class OEMFilterHelper  implements InitializingBean{
 		String token = null;
 		if (LOOKINPARAMETER.equals(whereIsTheToken)){
 			token = request.getParameter(parameterName);
+		}else if (LOOKINHEADER.equals(whereIsTheToken)){
+			token = request.getHeader(parameterName);
 		}
 		// TODO - add other places to get token
 		return token; 
