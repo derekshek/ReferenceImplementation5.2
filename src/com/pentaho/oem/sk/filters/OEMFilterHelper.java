@@ -8,6 +8,7 @@ import org.springframework.security.Authentication;
 
 public class OEMFilterHelper  implements InitializingBean{
 
+
 	String parameterName   = null;
 	String whereIsTheToken = null;
 	public static final String LOOKINPARAMETER = "parameter";
