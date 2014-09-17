@@ -11,12 +11,12 @@
 <!-- #######################################  Customer Specific Items        ############################## -->
 
    <bean id="ssoFilterHelper" class="com.customerspecific.CustomFilterHelper">
-   <!-- 
         <property name="parameterName"   value="secret" />
         <property name="whereIsTheToken" value="parameter" />
-    -->
+   <!-- 
         <property name="parameterName"   value="puser" />
         <property name="whereIsTheToken" value="header" />
+    -->
    </bean>
 
 <bean id="webServiceParser" class="com.customerspecific.CustomWebServiceParser">
