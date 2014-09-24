@@ -1,8 +1,0 @@
-<user authenticated="true">
-  <name>beavis</name>
-  <roles>
-     <role>SSOUser</role>
-  </roles>
-  <tenantid>9</tenantid>
-  <tenantName>Beavis</tenantName>
-</user>

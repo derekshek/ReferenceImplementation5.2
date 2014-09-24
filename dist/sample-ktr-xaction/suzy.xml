@@ -1,8 +1,0 @@
-<user authenticated="true">
-  <name>suzy</name>
-  <roles>
-    <role>Suzy's Special Role</role>
-  </roles>
-  <tenantid>5</tenantid>
-  <tenantName>Suzys_Company</tenantName>
-</user>
