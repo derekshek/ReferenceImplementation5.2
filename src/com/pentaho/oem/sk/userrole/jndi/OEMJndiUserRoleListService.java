@@ -43,9 +43,9 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 	private String sqlAllRoles;
 	private String sqlAllUsers;
 	private String sqlUsersInRole;
-	private String sqlRolesForUser;
 	private String jndiName;
 	private UserDetailsService userDetailsService;
+	private OEMJndiUserDetailsService peerUserDetailsService;
 	private ITenantedPrincipleNameResolver userNameUtils;
 
 	public OEMJndiUserRoleListService(ITenantedPrincipleNameResolver userNameUtils) {
@@ -67,11 +67,11 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 	public String getSqlUsersInRole()                        { return sqlUsersInRole; }
 	public void   setSqlUsersInRole(String sqlUsersInRole)   { this.sqlUsersInRole = sqlUsersInRole; }
 
-	public String getSqlRolesForUser()                       { return sqlRolesForUser; }
-	public void   setSqlRolesForUser(String sqlRolesForUser) { this.sqlRolesForUser = sqlRolesForUser; }
-
 	public UserDetailsService getParentUserDetailsService()  { return userDetailsService; }
 	public void setParentUserDetailsService(UserDetailsService userDetailsService) { this.userDetailsService = userDetailsService; }
+
+	public OEMJndiUserDetailsService getPeerUserDetailsService()  { return peerUserDetailsService; }
+	public void setPeerUserDetailsService(OEMJndiUserDetailsService userDetailsService) { this.peerUserDetailsService = userDetailsService; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +94,7 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 
 			String sql = this.getSqlAllRoles();
 			
-			conn = OEMUtil.getConnection(jndiName);
+			conn = peerUserDetailsService.getConnection(null);
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			
@@ -167,7 +167,7 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 		try {
 			String sql = this.getSqlAllUsers();
 			
-			conn = OEMUtil.getConnection(jndiName);
+			conn = peerUserDetailsService.getConnection(null);
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 						
@@ -208,7 +208,7 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 		try {
 			String sql = this.getSqlUsersInRole();
 
-			conn = OEMUtil.getConnection(jndiName);
+			conn = peerUserDetailsService.getConnection(null);
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, role);
 			rs = pstmt.executeQuery();
@@ -246,21 +246,6 @@ public class OEMJndiUserRoleListService implements IUserRoleListService {
 		//Strip Pentaho default tenant, it is not needed
     	String userId = userNameUtils.getPrincipleName(username);
 
-		// if security context already has this info, use it
-		try {
-			if (userId.equals(PentahoSessionHolder.getSession().getName())){
-				GrantedAuthority[] authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-				for (GrantedAuthority ga : authorities){
-					roleList.add(ga.toString());
-				}
-				return roleList;
-			}
-		} 
-		catch (NullPointerException e){
-//			LOG.debug("No session or security context. Ignore and move on."); //Swallow exception
-		}
-
-		
 		
 		//Call UserDetails Service to get the roles
 		UserDetails user = userDetailsService.loadUserByUsername(userId);

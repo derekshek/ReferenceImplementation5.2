@@ -58,7 +58,7 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 	private static String ContentPattern         = ".*Catalog=mondrian:/([^;]+).*";
 	private static String MongoContentPattern    = ".*Catalog=([^;]+).*";
 	@SuppressWarnings("unused")
-	private static String DatabaseContentPattern = ".*Database=([^;]+).*";
+	private static String DatabaseContentPattern = ".*dbname=([^;]+).*";
 	private static String HostContentPattern     = ".*Host=([^;]+).*";
 	private static String MongoDatasource        = "MongoDataServicesProvider";
 	private static String AUTOADD                = ".autoAdd";
@@ -97,12 +97,22 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 
 				boolean autoAdd = TRUE.equalsIgnoreCase(config.getProperty(catalog + AUTOADD) + "");
 				if (autoAdd){
+					//  Dynamically change host
 					String host = url.replaceAll(HostContentPattern, "$1");
 					Object dynamicHost = config.getProperty(catalog + ".host");
 					if (dynamicHost != null){
 						dynamicHost = commonRoutines.substituteVars(dynamicHost.toString());
 						if (dynamicHost != null){
-						   url  = url.replaceAll(host,dynamicHost.toString());
+						   url  = url.replaceAll("="+host,"="+dynamicHost.toString());
+						}
+					}
+					//  Dynamically change database
+					String database = url.replaceAll(DatabaseContentPattern, "$1");
+					Object dynamicDatabase = config.getProperty(catalog + ".database");
+					if (dynamicDatabase != null){
+						dynamicDatabase = commonRoutines.substituteVars(dynamicDatabase.toString());
+						if (dynamicDatabase != null){
+						   url  = url.replaceAll("="+database,"="+dynamicDatabase.toString());
 						}
 					}
 					

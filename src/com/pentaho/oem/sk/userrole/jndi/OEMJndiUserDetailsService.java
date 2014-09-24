@@ -17,11 +17,14 @@ package com.pentaho.oem.sk.userrole.jndi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.AuthenticationServiceException;
 import org.springframework.security.GrantedAuthority;
@@ -32,6 +35,7 @@ import org.springframework.security.userdetails.UsernameNotFoundException;
 
 import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
+import com.pentaho.oem.sk.filters.OEMFilterHelper;
 
 public class OEMJndiUserDetailsService implements UserDetailsService {
 
@@ -39,7 +43,13 @@ public class OEMJndiUserDetailsService implements UserDetailsService {
 	private static final Log LOG = LogFactory.getLog(OEMJndiUserDetailsService.class);
 	private ITenantedPrincipleNameResolver userNameUtils;
 	private String sqlRolesForUser;
-	private String jndiName;
+	private String jndiName = null;
+	private String dbconnectUser = null;
+	private String dbconnectPassword = null;
+	private String dbconnectURL = null;
+	private String dbconnectDB = null;
+	private OEMFilterHelper filterHelper = null;
+
 
 
 	public OEMJndiUserDetailsService(ITenantedPrincipleNameResolver userNameUtils) {
@@ -48,14 +58,61 @@ public class OEMJndiUserDetailsService implements UserDetailsService {
 	}
 	
 ///////////////////////////////////////////////// Getters and Setters //////////////////////////////////
-	public String getJndiName()                              { return jndiName; }
-	public void   setJndiName(String jndiName)               { this.jndiName = jndiName; }
+	public String getJndiName()                                  { return jndiName; }
+	public void   setJndiName(String jndiName)                   { this.jndiName = jndiName; }
 	
-	public String getSqlRolesForUser()                       { return sqlRolesForUser; }
-	public void   setSqlRolesForUser(String sqlRolesForUser) { this.sqlRolesForUser = sqlRolesForUser; }
+	public String getDbconnectUser()                             { return dbconnectUser; }
+	public void   setDbconnectUser(String dbconnectUser)         { this.dbconnectUser = dbconnectUser; }
+	public String getDbconnectPassword()                         { return dbconnectPassword; }
+	public void   setDbconnectPassword(String dbconnectPassword) { this.dbconnectPassword = dbconnectPassword; }
+	public String getDbconnectURL()                              { return dbconnectURL; }
+	public void   setDbconnectURL(String dbconnectURL)           { this.dbconnectURL = dbconnectURL; }
+	public String getDbconnectDB()                               { return dbconnectDB; }
+	public void   setDbconnectDB(String dbconnectDB)             { this.dbconnectDB = dbconnectDB; }
+	public String getSqlRolesForUser()                           { return sqlRolesForUser; }
+	public void   setSqlRolesForUser(String sqlRolesForUser)     { this.sqlRolesForUser = sqlRolesForUser; }
 
+	public OEMFilterHelper getFilterHelper()                     { return filterHelper; }
+	public void setFilterHelper(OEMFilterHelper filterHelper)    { this.filterHelper = filterHelper; }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public String getDatabaseUserId(String userId){
+		String dbUserId = userId;
+    	if (filterHelper != null){
+    		dbUserId = filterHelper.pentahoUserToServiceUser(userId); 
+    	}
+    	return dbUserId;
+	}
+
+	public Connection getConnection(String userId) throws Exception{
+		Connection conn = null;
+		String userDatabase = dbconnectDB;
+
+		// Use the current user if null userId 
+		if (userId == null){
+			IPentahoSession session = PentahoSessionHolder.getSession();
+			if (session != null){
+				userId = session.getName();
+			}
+		}
+
+		// override the database if needed
+    	if (filterHelper != null){
+    		String overrideDB = filterHelper.getDatabaseForUser(userId);
+    		if (overrideDB != null){
+    			userDatabase = overrideDB;
+    		}
+    	}
+    	
+		if (jndiName != null){
+			conn = OEMUtil.getConnection(getJndiName());
+		}else{
+			conn = OEMUtil.getConnection(dbconnectURL, userDatabase, dbconnectUser, dbconnectPassword);
+		}
+		return conn;
+	}
+	
+	
 	@Override
 	public UserDetails loadUserByUsername(String pentahoUserId) throws UsernameNotFoundException, DataAccessException, AuthenticationServiceException {
 
@@ -65,19 +122,21 @@ public class OEMJndiUserDetailsService implements UserDetailsService {
 		
 		//Strip internal tenant path from user ID
     	String userId = userNameUtils.getPrincipleName(pentahoUserId);
+    	
 
-		Connection conn = null;
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		ResultSet  rs = null;
+		Connection conn = null;
 
 		try {
-			
-			conn = OEMUtil.getConnection(getJndiName());
+			conn = getConnection(userId);
+			String dbUserId = getDatabaseUserId(userId);
 			String sql = this.getSqlRolesForUser();
+				
 			
 			// Extract the roles
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1,userId);
+			pstmt.setString(1,dbUserId);
 			rs = pstmt.executeQuery();
 		
 			String role = null;

@@ -17,11 +17,14 @@
 package com.pentaho.oem.sk;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Properties;
+
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
@@ -62,6 +65,21 @@ public class OEMUtil {
 		}
     }
 
+	public static Connection getConnection(String dbconnectURL, String userDatabase, String dbconnectUser, String dbconnectPassword) throws Exception {
+		try {
+			Properties props = new Properties();
+			props.put("user", dbconnectUser);
+			props.put("password", dbconnectPassword);
+			Connection conn = DriverManager.getConnection(dbconnectURL + userDatabase, props);
+			return conn;
+		}catch (Exception e) {
+			LOG.error("Failed to create a connection to:" + dbconnectURL + userDatabase + " as " + dbconnectUser, e);
+			throw e;
+		}
+	}
+	
+	
+	
 	public static void addRoleToCurrentSession(String role){
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		boolean alreadyHas = false;

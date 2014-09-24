@@ -1,5 +1,6 @@
 package com.pentaho.oem.sk.filters;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -29,8 +30,15 @@ public class OEMFilterHelper  implements InitializingBean{
 			token = request.getParameter(parameterName);
 		}else if (LOOKINHEADER.equals(whereIsTheToken)){
 			token = request.getHeader(parameterName);
+		}else if (LOOKINCOOKIE.equals(whereIsTheToken)){
+			for (Cookie cookie : request.getCookies()){
+				if (parameterName.equals(cookie.getName())){
+					token = cookie.getValue();
+					return token;
+				}
+			}
 		}
-		// TODO - add other places to get token
+		
 		return token; 
 	}
 	
@@ -40,6 +48,15 @@ public class OEMFilterHelper  implements InitializingBean{
 	
 	public void setSessionVariables(HttpServletRequestWrapper wrapper, Authentication authResult) {
 		return;
+	}
+	
+	
+	public String pentahoUserToServiceUser(String pentahoUser){
+		return pentahoUser;
+	}
+	
+	public String getDatabaseForUser(String pentahoUser){
+		return null;
 	}
 	
 	@Override
