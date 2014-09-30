@@ -1,6 +1,5 @@
 #!/bin/sh
 
-export JAVA_HOME=/usr/java/jre1.7.0_11
 CATALINA_OPTS="-Xms1024m -Xmx1024m -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
 export CATALINA_OPTS
 
@@ -11,7 +10,7 @@ cd $dir
 dir=`pwd`
 arg=$1
 
-PSCMD="ps -ef | grep java | grep biserver | grep -v postgres | grep -v data-integration-server| grep -v grep | grep $dir  | cut -c9-15" 
+PSCMD="ps -ef | grep java | grep biserver | grep -v postgres | grep -v data-integration-server| grep -v grep | grep $dir  |awk '{print $2}' " 
 STOPCMD="./ctlscript.sh stop baserver  2>/dev/null | grep -v Using"
 
 ### I change log4j.xml to put all logs under pentaho/logs, and blow away catalina.out

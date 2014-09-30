@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.Authentication;
+import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 
 public class OEMFilterHelper  implements InitializingBean{
 
@@ -40,6 +41,11 @@ public class OEMFilterHelper  implements InitializingBean{
 		}
 		
 		return token; 
+	}
+	
+	
+	public boolean requiresAuthentication(UsernamePasswordAuthenticationToken existing, String secretValue) {
+		 return !((UsernamePasswordAuthenticationToken) existing).getCredentials().equals(secretValue);
 	}
 	
 	public String resolveUsername (String token){ 

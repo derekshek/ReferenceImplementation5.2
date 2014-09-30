@@ -16,14 +16,21 @@
  */
 package com.pentaho.oem.sk.userrole;
 
+import java.util.LinkedList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.GrantedAuthority;
+import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
+
+import com.pentaho.oem.sk.OEMUser;
+import com.pentaho.oem.sk.OEMUtil;
 
 public class OEMMultiUserDetailsService implements InitializingBean,
 		UserDetailsService {
@@ -52,6 +59,16 @@ public class OEMMultiUserDetailsService implements InitializingBean,
 			throws UsernameNotFoundException, DataAccessException {
 		UserDetails details = null;
 
+		if (username.startsWith("pentahoRepoAdmin")){
+			LinkedList<GrantedAuthority> authorities = new LinkedList<GrantedAuthority>();
+			authorities.add(new GrantedAuthorityImpl(OEMUtil.PENTAHOADMIN));
+			authorities.add(new GrantedAuthorityImpl(OEMUtil.PENTAHOAUTH));
+			details = new OEMUser(username, username, true, true, true, true, authorities.toArray(new GrantedAuthority[0]));
+			LOG.debug("User " + username + " returning admin/auth");
+			return details;
+		}
+		
+		
 		for (UserDetailsService service : subUserDetailsServices) {
 			LOG.debug("User " + username + " Trying delegate service" + service);
 			try {

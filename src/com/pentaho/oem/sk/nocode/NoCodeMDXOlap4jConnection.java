@@ -57,7 +57,6 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 	private static String UseContentChecksum     = "UseContentChecksum=true";
 	private static String ContentPattern         = ".*Catalog=mondrian:/([^;]+).*";
 	private static String MongoContentPattern    = ".*Catalog=([^;]+).*";
-	@SuppressWarnings("unused")
 	private static String DatabaseContentPattern = ".*dbname=([^;]+).*";
 	private static String HostContentPattern     = ".*Host=([^;]+).*";
 	private static String MongoDatasource        = "MongoDataServicesProvider";
@@ -79,24 +78,32 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 //			LOG.debug("Property " + p +  " = " + props.getProperty(key));
 //		}
 		String url = props.getProperty(URL);
-		if (dsp != null && !url.contains(DynamicSchemaProcessor)){
+		if ( ! url.contains(DynamicSchemaProcessor)){
 			NoCodeCommon commonRoutines = new NoCodeCommon();
 			PropertiesConfiguration config = commonRoutines.getConfiguration();
 			if (config != null){
 				String catalog;
 				String useDsp = dsp;
-				String useChecksum = UseContentChecksum;
+//				String useChecksum = null;
 				if (url.contains(MongoDatasource)){
 					catalog = url.replaceAll(MongoContentPattern, "$1");
-					useDsp = null; ////////////////////////////////////////////// add back when OSGI is figured out
-					useChecksum = null;
 				}else{
 					catalog = url.replaceAll(ContentPattern, "$1");
 				}
 
 
 				boolean autoAdd = TRUE.equalsIgnoreCase(config.getProperty(catalog + AUTOADD) + "");
+				Object explicitDsp = config.getProperty(catalog + ".dsp");
+				if (explicitDsp != null){
+					explicitDsp = commonRoutines.substituteVars(explicitDsp.toString());
+					if (explicitDsp != null){
+						useDsp = explicitDsp.toString();
+						autoAdd = true;
+					}
+				}
+
 				if (autoAdd){
+//					useChecksum = UseContentChecksum;
 					//  Dynamically change host
 					String host = url.replaceAll(HostContentPattern, "$1");
 					Object dynamicHost = config.getProperty(catalog + ".host");
@@ -129,10 +136,11 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 					}
 					if (useDsp != null){
 						url = url + ";" + DynamicSchemaProcessor + "=" + useDsp;
-					}
-					if (useChecksum != null){
 						url = url + ";" + UseContentChecksum;
 					}
+//					if (useChecksum != null){
+//						url = url + ";" + UseContentChecksum;
+//					}
 					props.setProperty(URL, url);
 					LOG.debug("Modified Connection URL to " + url);
 				}

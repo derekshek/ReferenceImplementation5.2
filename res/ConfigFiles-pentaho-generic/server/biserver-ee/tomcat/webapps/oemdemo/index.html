@@ -53,6 +53,9 @@ function getFiles(dir,divobject,title,frameObject,div){
     $.ajax({
         url: SERVER_BASE + "api/repo/files/"+path+"/tree?depth=5",
         headers: {"Accept": "application/json"},
+        xhrFields: {
+            withCredentials: true
+        },
         asynch:false
       })
       .done(function (data){

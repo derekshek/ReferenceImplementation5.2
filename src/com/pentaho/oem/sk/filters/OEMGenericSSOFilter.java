@@ -116,22 +116,20 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		
 		String secretValue = filterHelper.getToken(wrapper);
 		if (secretValue != null) {
-			LOG.debug("Found secret "+secretValue);
-			if (requiresAuthenication(secretValue)) {
+//			LOG.debug("Found secret "+secretValue);
+			if (requiresAuthentication(secretValue)) {
 //				SecurityContextHolder.clearContext();
 //				HttpSession session = request.getSession(false);
 //				if (session != null) {
 //		            session.invalidate();
 //		        }
-				LOG.debug("User Requires Authentication!");
 				String username = filterHelper.resolveUsername(secretValue);
-				LOG.debug("Resolved to "+username);
+				LOG.debug("User Requires Authentication!  -- Resolved to "+username);
 				if (username == null){
 					failure = new BadCredentialsException("unable to resolve username into token");
 				}else{
 					UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, secretValue);
 					token.setDetails(authenticationDetailsSource.buildDetails(wrapper));
-					LOG.debug("done setting token!");
 
 					try {
 						Authentication authResult;
@@ -176,7 +174,7 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		 this.eventPublisher = eventPublisher;
 	}
 	
-	private boolean requiresAuthenication(String secretValue) {
+	private boolean requiresAuthentication(String secretValue) {
 		boolean required = false;
 		Authentication existing = SecurityContextHolder.getContext().getAuthentication();
 
@@ -185,7 +183,7 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		}
 
 		if (!required && (existing instanceof UsernamePasswordAuthenticationToken)) {
-			required =  !((UsernamePasswordAuthenticationToken) existing).getCredentials().equals(secretValue);
+			required = filterHelper.requiresAuthentication((UsernamePasswordAuthenticationToken) existing, secretValue);
 		}
 
 		if (existing instanceof AnonymousAuthenticationToken) {

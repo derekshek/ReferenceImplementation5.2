@@ -247,5 +247,5 @@ explicitly covering such access.
   <default-theme>oem</default-theme>
 
   <!-- location of the /home/kevinh/pentaho/ImplementationToolbox/pentaho510/server/biserver-ee/wkhtmltoimage/wkhtmltoimage-amd64 tool -->
-  <html-to-image-tool>/home/kevinh/pentaho/ImplementationToolbox/pentaho510/server/biserver-ee/wkhtmltoimage/wkhtmltoimage-amd64</html-to-image-tool>
+  <html-to-image-tool>@@@PENTAHO_HOME@@@/server/biserver-ee/wkhtmltoimage/wkhtmltoimage-amd64</html-to-image-tool>
 </pentaho-system>

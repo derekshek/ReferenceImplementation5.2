@@ -35,10 +35,12 @@
 	<property name="publish-content-post"     location="${publish}/Content-post" />
 
 
-	<!-- set classpath -->
 	<path id="compile.classpath">
+	<!-- set classpath -->
 		<fileset dir="${pentaho-install}/${pentaho-webapp-lib}">
 			<include name="**/*.jar" />
+			<exclude name="${dist-jar-name}" />
+			<exclude name="${cust-jar-name}" />
 		</fileset>
 		<fileset dir="${pentaho-install}/${tomcat-lib}">
 			<include name="servlet-api.jar" />
