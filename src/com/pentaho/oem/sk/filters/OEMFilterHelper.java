@@ -32,10 +32,13 @@ public class OEMFilterHelper  implements InitializingBean{
 		}else if (LOOKINHEADER.equals(whereIsTheToken)){
 			token = request.getHeader(parameterName);
 		}else if (LOOKINCOOKIE.equals(whereIsTheToken)){
-			for (Cookie cookie : request.getCookies()){
-				if (parameterName.equals(cookie.getName())){
-					token = cookie.getValue();
-					return token;
+			Cookie[] cookies = request.getCookies();
+			if (cookies != null){
+				for (Cookie cookie : request.getCookies()){
+					if (parameterName.equals(cookie.getName())){
+						token = cookie.getValue();
+						return token;
+					}
 				}
 			}
 		}
