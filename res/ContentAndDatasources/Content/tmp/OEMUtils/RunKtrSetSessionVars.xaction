@@ -24,7 +24,7 @@
   <resources> 
     <transformation-file> 
       <solution-file> 
-        <location>/opt/pentaho512/sample-ktr-xaction/SessionVariableLookup.ktr</location>  
+        <location>/opt/pentaho520/sample-ktr-xaction/SessionVariableLookup.ktr</location>  
         <mime-type>text/plain</mime-type> 
       </solution-file> 
     </transformation-file> 
