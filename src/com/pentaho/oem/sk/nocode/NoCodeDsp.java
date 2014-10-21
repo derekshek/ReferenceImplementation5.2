@@ -53,6 +53,8 @@ import org.dom4j.tree.DefaultElement;
 public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.spi.DynamicSchemaProcessor {
 
 	private static final String SUBSTITUTESTRING = ".replaceString";
+	private static String ALLSCHEMAS             = "ALL_SCHEMAS";
+	private static final String COMMENT = ".comment";
 	private static Log LOG = LogFactory.getLog(NoCodeDsp.class);
     private NoCodeCommon commonRoutines = null;
 	@Override 
@@ -154,7 +156,7 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 			XMLWriter writer = new XMLWriter(bres);
 			writer.write(schema);
 //			LOG.debug("New schema:\n"+bres.toString());
-			return bres.toString();
+			return addComment(bres.toString(), schemaName, config, commonRoutines);
 		} catch (Exception e1) {
 			LOG.debug("Exception caught:"+e1);
 			e1.printStackTrace();
@@ -162,6 +164,20 @@ public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.
 		return before;	
 	}
 
+
+	///////////////////////////////   Add a comment for uniqueness when IDBDatasourceService is used
+	///////////////////////////////      look of JdbcConnectionUuid fix to make this obsolete eventually
+	public String addComment(String before,String catalog, PropertiesConfiguration config, NoCodeCommon commonRoutines){
+		Object comment = config.getProperty(catalog + COMMENT);
+		if (comment == null){
+			comment = config.getProperty(ALLSCHEMAS + COMMENT);
+		}
+		if (comment != null){
+			String s = commonRoutines.substituteVars(comment.toString(), false);
+			return before.replace("</Schema>", "\n<!--\n" + s + "\n-->\n" + "</Schema>");
+		}
+	    return before;	
+	}
 	
 	public String uglyBackwardsCompatibleStringSubstitute(String before, String marker){
 		//  Backwards compatibility with the old string substitute stuff

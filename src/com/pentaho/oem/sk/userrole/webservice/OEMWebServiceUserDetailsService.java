@@ -136,6 +136,7 @@ public class OEMWebServiceUserDetailsService implements UserDetailsService, Init
 					for (String variable : sessionVars.keySet()){
 						details.addSessionVariable(variable, sessionVars.get(variable));
 					}
+					LOG.debug("User "+ username + "validated from serviceURL " + actualURL);
 					return details;
 				}
 				LOG.debug("User "+ username + " not validated in webservice response from serviceURL");

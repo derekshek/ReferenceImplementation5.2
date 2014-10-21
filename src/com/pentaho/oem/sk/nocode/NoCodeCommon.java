@@ -178,6 +178,10 @@ public class NoCodeCommon {
 
 
 	public String substituteVars(String sql) {
+		return substituteVars(sql, true);
+	}
+
+	public String substituteVars(String sql, boolean failOnNoVar) {
 		IPentahoSession session = PentahoSessionHolder.getSession();
 		if (session == null){
 			return null;
@@ -187,12 +191,12 @@ public class NoCodeCommon {
 		while (matcher.find()) {
 			String varname = matcher.group(1);
 			String value = (String) session.getAttribute(varname);
-			if (value == null){
+			if (value == null && failOnNoVar){
 //				LOG.debug("User does not have session variable "+ varname);
 				return null;
 			}
 //			LOG.debug("Replacing "+ varname + " with "+ value);
-			matcher.appendReplacement(newSql, value);
+			matcher.appendReplacement(newSql, value + "");
 		}
 		return matcher.appendTail(newSql).toString();
 	}

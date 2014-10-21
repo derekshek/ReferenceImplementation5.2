@@ -61,6 +61,7 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 	private static String HostContentPattern     = ".*Host=([^;]+).*";
 	private static String MongoDatasource        = "MongoDataServicesProvider";
 	private static String AUTOADD                = ".autoAdd";
+	private static String ALLSCHEMAS             = "ALL_SCHEMAS";
 	private static String TRUE                   = "true";
 	private static String JdbcConnectionUuid     = "JdbcConnectionUuid";
 	private static String CONNECTIONUUID         = ".jdbcConnectionUuid";
@@ -92,7 +93,9 @@ public class NoCodeMDXOlap4jConnection extends org.pentaho.platform.plugin.servi
 				}
 
 
-				boolean autoAdd = TRUE.equalsIgnoreCase(config.getProperty(catalog + AUTOADD) + "");
+				boolean autoAdd = TRUE.equalsIgnoreCase(config.getProperty(catalog + AUTOADD) + "") ||
+						TRUE.equalsIgnoreCase(config.getProperty(ALLSCHEMAS + AUTOADD) + "");
+
 				Object explicitDsp = config.getProperty(catalog + ".dsp");
 				if (explicitDsp != null){
 					explicitDsp = commonRoutines.substituteVars(explicitDsp.toString());

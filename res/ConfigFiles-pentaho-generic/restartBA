@@ -10,7 +10,7 @@ cd $dir
 dir=`pwd`
 arg=$1
 
-PSCMD="ps -ef | grep java | grep biserver | grep -v postgres | grep -v data-integration-server| grep -v grep | grep $dir  |awk '{print $2}' " 
+PSCMD="ps -ef | grep java | grep biserver | grep -v postgres | grep -v data-integration-server| grep -v grep | grep $dir  |awk '{print \$2}' " 
 STOPCMD="./ctlscript.sh stop baserver  2>/dev/null | grep -v Using"
 
 ### I change log4j.xml to put all logs under pentaho/logs, and blow away catalina.out

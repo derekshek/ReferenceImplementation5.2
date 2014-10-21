@@ -17,6 +17,7 @@
 package com.pentaho.oem.sk.security.voter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IRepositoryAccessVoter;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+import org.pentaho.platform.api.repository2.unified.RepositoryFileAce;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileAcl;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
 import org.springframework.security.userdetails.User;
@@ -33,11 +35,16 @@ import com.pentaho.oem.sk.OEMUtil;
 public class OEMAccessVoter implements IRepositoryAccessVoter{
 
 	Log LOG = LogFactory.getLog(OEMAccessVoter.class);
+	private OEMVoterHelper helper = null;
 	private String tenantTop;
 	private String tenantVar;
+	private String sharedFolder;
 	private Set<String> hideTheseForTenants = new HashSet<String>();
 	
 
+	///////////////////////////////////////////// getters and setters ///////////////////////////////////////
+	public OEMVoterHelper getHelper() { return helper; }
+	public void setHelper(OEMVoterHelper helper) { this.helper = helper; }
 	public void setHideTheseForTenants(String[] hideThese) {
 		for (String dir : hideThese){
 			this.hideTheseForTenants.add(dir);
@@ -45,6 +52,8 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 	}
 	public String getTenantTop()                 { return tenantTop; }
 	public void setTenantTop(String tenantTop)   { this.tenantTop = tenantTop; }
+	public String getSharedFolder()                 { return sharedFolder; }
+	public void setSharedFolder(String sharedFolder)   { this.sharedFolder = sharedFolder; }
 	public String getTenantVar()                { return tenantVar; }
 	public void setTenantVar(String tenantVar) { this.tenantVar = tenantVar; }
 
@@ -55,7 +64,9 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 			RepositoryFileAcl acl, 
 			IPentahoSession session) {
 
-	
+
+        String msg = "--------------------" + file.getPath() + "  " + operation;
+
 		// Get the content request path - turn into array
 		String[] topLevelDirs = getTopLevelDirNames(file);
 		if (topLevelDirs == null || topLevelDirs.length < 2){
@@ -74,21 +85,41 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 		String tenantid = "" + session.getAttribute(tenantVar);
 		if (tenantTop != null && tenantTop.equals(level1)){
 			if (level2 == null){ 
+     			LOG.debug("Allow level 2 null " + msg);
 				return true;
 			}
+			
+			if (tenantid != null && level2.equals(sharedFolder) && operation.equals(RepositoryFilePermission.READ)){
+     			LOG.debug("Allow level 2 shared " + msg);
+				return true;
+			}
+			
+			///////////////////////////////// Isolate any custom logic in the helper ////////////////////
+			if (helper != null){
+				Boolean customCheck = helper.hasAccess(file, operation, acl, session, topLevelDirs);
+				if (customCheck != null){
+					return customCheck;
+				}
+			}
+
+			
 			if (tenantid != null && tenantid.equals(level2)){
+				LOG.debug("Allow  by tenant id " + msg);
 				return true;
 			}
+			LOG.debug("Deny by default " + msg);
 			return false;
 		}
 		
 		// Hide to tenants
 		if (tenantid != null){
 			if (hideTheseForTenants.contains(level1)){
+				LOG.debug("Deny by hide toplevel " + msg);
 				return false;
 			}
 		}
 
+		LOG.debug("Allow by default " + msg);
 		return true; 
 	}
 	
