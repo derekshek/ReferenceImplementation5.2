@@ -45,7 +45,7 @@ iframe{
     <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
-var SERVER_BASE = "http://localhost:8080/pentaho/";
+var SERVER_BASE = "http://@@@PENTAHO_SERVER_PORT@@@/pentaho/";
 
 
 function getFiles(dir,divobject,title,frameObject,div){
@@ -191,7 +191,7 @@ function logout(){
  <body onload="contentFrame().src= SERVER_BASE + 'welcome/status.jsp';">
 <form>
 <div class="headersection">
-<img src="http://localhost:8080/pentaho/content/common-ui/resources/themes/oem/images/oem-puc-login-logo.png"><br>
+<img src="http://@@@PENTAHO_SERVER_PORT@@@/pentaho/content/common-ui/resources/themes/oem/images/oem-puc-login-logo.png"><br>
 Change local user to: 
 <select id="userDropdown">
    <option value="sean">sean</option>

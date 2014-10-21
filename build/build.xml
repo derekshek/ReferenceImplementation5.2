@@ -125,6 +125,9 @@
 		<replace dir="${dist}" value="${pentaho-install}" excludes="*jar" >
 		    <replacetoken>@@@PENTAHO_HOME@@@</replacetoken>
 		</replace>
+		<replace dir="${dist}" value="${pentaho-server-port}" excludes="*jar" >
+		    <replacetoken>@@@PENTAHO_SERVER_PORT@@@</replacetoken>
+		</replace>
 
 		<antcall target="dist-theme" />
 
