@@ -1,0 +1,13 @@
+
+This is not official Pentaho code --- use at your own risk
+
+1. At present, this code is only tested with Enterprise Edition 5.2.0 -- contact your Pentaho consulatant for 5.1.x assistance.  
+2. Install a fresh 5.2 using the "installer" version
+3. To install:
+    a)  have a fresh install of BA Server Enterprise Edition 5.2 running
+    b)  change to the "build" directory
+    c)  edit build.properties -- change
+          i) build.properties to your Pentaho root install
+          ii) change pentaho-server-port if needed
+    d) run "ant install"
+ 
