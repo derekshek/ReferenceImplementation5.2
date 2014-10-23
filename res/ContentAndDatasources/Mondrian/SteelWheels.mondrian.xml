@@ -2,7 +2,7 @@
 	<Cube name="SteelWheelsSales" cache="true" enabled="true">
 		<Table name="ORDERFACT">
 		</Table>
-		<Dimension foreignKey="CUSTOMERNUMBER" name="Markets">
+		<Dimension foreignKey="CUSTOMERNUMBER" name="Markets" caption="%{steelwheels.markets.caption}">
 			<Hierarchy hasAll="true" allMemberName="All Markets" primaryKey="CUSTOMERNUMBER" primaryKeyTable="">
 				<Table name="CUSTOMER_W_TER">
 				</Table>
@@ -100,13 +100,13 @@
 				</Level>
 			</Hierarchy>
 		</Dimension>
-		<Measure name="Quantity" column="QUANTITYORDERED" formatString="#,###" aggregator="sum">
+		<Measure name="Quantity" column="QUANTITYORDERED" formatString="%{number.format}" aggregator="sum">
       <Annotations>
         <Annotation name="AnalyzerBusinessGroup">Measures</Annotation>
       </Annotations>
       <!--CalculatedMemberProperty name="CHART_SERIES_COLOR" value="#0000cc" /-->
 		</Measure>
-		<Measure name="Sales" column="TOTALPRICE" formatString="#,###" aggregator="sum">
+		<Measure name="Sales" column="TOTALPRICE" formatString="#.###" aggregator="sum">
       <Annotations>
         <Annotation name="AnalyzerBusinessGroup">Measures</Annotation>
       </Annotations>

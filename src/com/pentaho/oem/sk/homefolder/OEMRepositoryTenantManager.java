@@ -19,6 +19,7 @@ package com.pentaho.oem.sk.homefolder;
 
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,19 +34,24 @@ import org.pentaho.platform.repository2.mt.RepositoryTenantManager;
 import org.pentaho.platform.repository2.unified.IRepositoryFileAclDao;
 import org.pentaho.platform.repository2.unified.IRepositoryFileDao;
 import org.pentaho.platform.security.policy.rolebased.IRoleAuthorizationPolicyRoleBindingDao;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.extensions.jcr.JcrTemplate;
 import org.springframework.security.userdetails.UserDetailsService;
 
 import com.pentaho.oem.sk.OEMUser;
 
-public class OEMRepositoryTenantManager extends RepositoryTenantManager {
+public class OEMRepositoryTenantManager extends RepositoryTenantManager implements InitializingBean{
 
 
+
+
+	private static final Log LOG = LogFactory.getLog(OEMRepositoryTenantManager.class);
 	private String noCreateHomeRole;
-
-
-	public String getNoCreateHomeRole()                      { return noCreateHomeRole; }
-	public void setNoCreateHomeRole(String noCreateHomeRole) { this.noCreateHomeRole = noCreateHomeRole; }
+	private String tenantTop;
+	private String tenantVar;
+	private OEMTenantManagerHelper helper = null;
+	private UserDetailsService userDetailsService = PentahoSystem.get(UserDetailsService.class);
+	protected Map<String,Object> customerSpecificValueMap = null;
 
 
 	public OEMRepositoryTenantManager(IRepositoryFileDao contentDao,
@@ -65,16 +71,18 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 				singleTenantAuthenticatedAuthorityRoleBindingList);
 	}
 
-	private static final Log LOG = LogFactory.getLog(OEMRepositoryTenantManager.class);
-	private String tenantTop;
-	private String tenantVar;
 
-	public String getTenantTop()                 { return tenantTop; }
-	public void setTenantTop(String tenantTop)   { this.tenantTop = tenantTop; }
-	public String getTenantVar()                { return tenantVar; }
-	public void setTenantVar(String tenantVar) { this.tenantVar = tenantVar; }
+	///////////////////////////////////////////// getters and setters ///////////////////////////////////////
+	public Map<String, Object> getCustomerSpecificValueMap() { return customerSpecificValueMap; }
+	public void setCustomerSpecificValueMap( Map<String, Object> customerSpecificValueMap) { this.customerSpecificValueMap = customerSpecificValueMap; }
+
+	public OEMTenantManagerHelper getHelper()            { return helper; }
+	public void setHelper(OEMTenantManagerHelper helper) { this.helper = helper; }
+	public UserDetailsService getUserDetailsService() { return userDetailsService; }
+	public void setUserDetailsService(UserDetailsService userDetailsService) { this.userDetailsService = userDetailsService; }
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private UserDetailsService userDetailsService = PentahoSystem.get(UserDetailsService.class);
 	 @Override
 	  public RepositoryFile createUserHomeFolder(ITenant theTenant, String username) {
 	    RepositoryFile userHomeFolder = null;
@@ -121,7 +129,7 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	    	LOG.warn("No top level tenant folder (creating) "+ tenantTop);
 	    	RepositoryFile topFolder = repository.getFile("/");
 	    	RepositoryFile newFolder = new RepositoryFile.Builder(tenantTop).folder(true).build();
-	    	tenantParentFolder = repository.createFolder(topFolder.getId(), newFolder, "Autocreated app dir");
+	    	tenantParentFolder = repository.createFolder(topFolder.getId(), newFolder, "Autocreated tenant top");
 	    }
 	    ////////////  Create tenant subfolder if not exists
 	    try{
@@ -129,8 +137,11 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	    	if (tenantSubFolder == null){
 	    		LOG.warn("No  tenant folder (creating) "+ tenantName);
 	    		RepositoryFile newTenantFolder = new RepositoryFile.Builder(tenantName).folder(true).build();
-	    		RepositoryFile appFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
-	    		return appFolder;
+	    		RepositoryFile tenantFolder = repository.createFolder(tenantParentFolder.getId(), newTenantFolder, "Autocreated tenant dir");
+	    		if (helper != null){
+	    			helper.proceessTenantDir(repository, tenantFolder);
+	    		}
+	    		return tenantFolder;
 	    	}
 	    }catch (Exception e){
 	    	LOG.error("Error in subfolder creation: "+e);
@@ -140,11 +151,28 @@ public class OEMRepositoryTenantManager extends RepositoryTenantManager {
 	    return userHomeFolder;
 	  }
 
-	public UserDetailsService getUserDetailsService() {
-		return userDetailsService;
-	}
-	public void setUserDetailsService(UserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
+	
+	
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (customerSpecificValueMap != null){
+			if (customerSpecificValueMap.containsKey("tenantTop")){
+				this.tenantTop = customerSpecificValueMap.get("tenantTop") + "";
+			}
+			if (customerSpecificValueMap.containsKey("noCreateHomeRole")){
+				this.noCreateHomeRole = customerSpecificValueMap.get("noCreateHomeRole") + "";
+			}
+			if (customerSpecificValueMap.containsKey("tenantVar")){
+				this.tenantVar = customerSpecificValueMap.get("tenantVar") + "";
+			}
+			if (customerSpecificValueMap.containsKey("tenantManagerHelper")){
+				this.helper = (OEMTenantManagerHelper) customerSpecificValueMap.get("tenantManagerHelper");
+			}
+			if (customerSpecificValueMap.containsKey("userDetailsService")){
+				this.userDetailsService = (UserDetailsService) customerSpecificValueMap.get("userDetailsService");
+			}
+		}
 	}
 
 

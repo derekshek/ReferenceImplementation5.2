@@ -105,12 +105,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   <bean id="nonPooledOrJndiDatasourceService" class="org.pentaho.platform.engine.services.connection.datasource.dbcp.NonPooledOrJndiDatasourceService" scope="singleton" />
   
   <bean id="IDBDatasourceService" class="com.pentaho.oem.sk.datasource.OEMDatasourceService" scope="singleton">
-       <property name="sessionVariableToAppend" value="custId" />
-       <property name="datasourcesToModify">
-          <list>
-             <value>SampleData</value>
-          </list>
-       </property>
+      <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
+ 
     <property name="pooledDatasourceService" ref="pooledOrJndiDatasourceService" />
     <property name="nonPooledDatasourceService" ref="nonPooledOrJndiDatasourceService" />
   </bean>

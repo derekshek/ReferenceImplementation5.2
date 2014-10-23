@@ -16,8 +16,10 @@
 */
 package com.pentaho.oem.sk.security.voter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -28,11 +30,12 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileAce;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileAcl;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.userdetails.User;
 
 import com.pentaho.oem.sk.OEMUtil;
 
-public class OEMAccessVoter implements IRepositoryAccessVoter{
+public class OEMAccessVoter implements IRepositoryAccessVoter, InitializingBean{
 
 	Log LOG = LogFactory.getLog(OEMAccessVoter.class);
 	private OEMVoterHelper helper = null;
@@ -40,22 +43,15 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 	private String tenantVar;
 	private String sharedFolder;
 	private Set<String> hideTheseForTenants = new HashSet<String>();
-	
+	protected Map<String,Object> customerSpecificValueMap = null;
+
 
 	///////////////////////////////////////////// getters and setters ///////////////////////////////////////
+	public Map<String, Object> getCustomerSpecificValueMap() { return customerSpecificValueMap; }
+	public void setCustomerSpecificValueMap( Map<String, Object> customerSpecificValueMap) { this.customerSpecificValueMap = customerSpecificValueMap; }
+
 	public OEMVoterHelper getHelper() { return helper; }
 	public void setHelper(OEMVoterHelper helper) { this.helper = helper; }
-	public void setHideTheseForTenants(String[] hideThese) {
-		for (String dir : hideThese){
-			this.hideTheseForTenants.add(dir);
-		}
-	}
-	public String getTenantTop()                 { return tenantTop; }
-	public void setTenantTop(String tenantTop)   { this.tenantTop = tenantTop; }
-	public String getSharedFolder()                 { return sharedFolder; }
-	public void setSharedFolder(String sharedFolder)   { this.sharedFolder = sharedFolder; }
-	public String getTenantVar()                { return tenantVar; }
-	public void setTenantVar(String tenantVar) { this.tenantVar = tenantVar; }
 
 
 	@Override
@@ -134,6 +130,29 @@ public class OEMAccessVoter implements IRepositoryAccessVoter{
 		} else {
 			return null;
 		}
+	}
+	
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (customerSpecificValueMap != null){
+			if (customerSpecificValueMap.containsKey("tenantTop")){
+				this.tenantTop = customerSpecificValueMap.get("tenantTop") + "";
+			}
+			if (customerSpecificValueMap.containsKey("sharedFolder")){
+				this.sharedFolder = customerSpecificValueMap.get("sharedFolder") + "";
+			}
+			if (customerSpecificValueMap.containsKey("tenantVar")){
+				this.tenantVar = customerSpecificValueMap.get("tenantVar") + "";
+			}
+			if (customerSpecificValueMap.containsKey("hideTheseForTenants")){
+				ArrayList<String> hideThese = (ArrayList<String>) customerSpecificValueMap.get("hideTheseForTenants");
+				for (String dir : hideThese){
+					this.hideTheseForTenants.add(dir);
+				}
+			}
+		}
+		
 	}		
 
 }

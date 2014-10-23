@@ -233,10 +233,9 @@
     to bypass transaction and method level security for test purposes you can reference this bean directly.
   -->
   <bean id="ITenantManager" class="com.pentaho.oem.sk.homefolder.OEMRepositoryTenantManager">
+    <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
     <property name="userDetailsService"><ref bean="oemMultiUserDetailsService"/></property>
-    <property name="noCreateHomeRole"><value>SSOUser</value></property>
-    <property name="tenantTop" value="Tenants"/>
-    <property name="tenantVar" value="tenantName"/>
+    <property name="helper"><ref bean="tenantManagerHelper" /></property>
     
  <!--
   <bean id="ITenantManager" class="org.pentaho.platform.repository2.mt.RepositoryTenantManager">
@@ -705,15 +704,10 @@
     <property name="exposeNativeSession" value="true"/>
   </bean>
   
+ 
   <bean id="oemAccessVoter" class="com.pentaho.oem.sk.security.voter.OEMAccessVoter">
-       <property name="tenantTop" value="Tenants"/>
-       <property name="tenantVar" value="tenantName"/>
-       <property name="hideTheseForTenants">
-          <list>
-             <value>public</value>
-             <value>home</value>
-          </list>
-       </property>
+    <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
+       <property name="helper" ref="voterHelper" />
   </bean>
   
   <bean id="repositoryAccessVoterManager"

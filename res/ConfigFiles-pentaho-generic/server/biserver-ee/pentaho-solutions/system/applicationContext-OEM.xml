@@ -10,7 +10,44 @@
 
 <!-- #######################################  Customer Specific Items        ############################## -->
 
+
+<util:list id="hideTheseForTenants">     <!--  enumerate top-level folders to hide for SSO users with AccessVoter -->
+      <value>public</value>
+      <value>home</value>
+</util:list>
+
+
+<util:list id="datasourcesToModify">     <!--  enumerate datasources to modify with IDBDatasourceService  -->
+      <value>*</value>
+</util:list>
+
+
+  <util:map id="customerSpecificValueMap">
+      <!--  these are used by OEM classes -->
+      <entry key="tenantVar"               value="custId" />
+      <entry key="tenantTop"               value="Teradata" />
+      <entry key="noCreateHomeRole"        value="SSOUser" />
+      <entry key="sharedFolder"            value="Standard" />
+      <entry key="hideTheseForTenants"     value-ref="hideTheseForTenants" />
+      <entry key="sessionVariableToAppend" value="custId" />
+      <entry key="datasourcesToModify"     value-ref="datasourcesToModify" />
+
+      <!-- the following are used by customer-specific helpers only  -->
+      <entry key="categoryFolders"         value-ref="categoryFolders" />
+      <entry key="usernameTag"             value="email" />
+  </util:map>
+
+
+  <bean id="tenantManagerHelper" class="com.customerspecific.CustomTenantManagerHelper">
+    <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
+  </bean>
+
+ <bean id="voterHelper" class="com.customerspecific.CustomVoterHelper">
+    <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
+  </bean>
+
    <bean id="ssoFilterHelper" class="com.customerspecific.CustomFilterHelper">
+       <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
         <property name="parameterName"   value="secret" />
         <property name="whereIsTheToken" value="parameter" />
    <!-- 
@@ -39,12 +76,6 @@
 <!-- #######################################  Filters ... added to the chain                 ############################## -->
   
 
-<!--
-   <bean id="ssoFilterHelper" class="com.pentaho.oem.sk.filters.OEMFilterHelper">
-        <property name="parameterName"   value="secret" />
-        <property name="whereIsTheToken" value="parameter" />
-   </bean>
--->
 
    <bean id="ssoProcessingFilter" class="com.pentaho.oem.sk.filters.OEMGenericSSOFilter">
         <property name="authenticationManager">

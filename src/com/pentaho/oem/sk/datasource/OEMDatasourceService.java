@@ -17,7 +17,9 @@
 
 package com.pentaho.oem.sk.datasource;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,14 +30,16 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.services.connection.datasource.dbcp.DynamicallyPooledOrJndiDatasourceService;
 import org.pentaho.platform.engine.services.connection.datasource.dbcp.PooledOrJndiDatasourceService;
+import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
 
-public class OEMDatasourceService  extends  DynamicallyPooledOrJndiDatasourceService{
+public class OEMDatasourceService  extends  DynamicallyPooledOrJndiDatasourceService implements InitializingBean{
 	Log logger = LogFactory.getLog(OEMDatasourceService.class);
 	private Set<String> datasourcesToModify = new HashSet<String>();
 	private String sessionVariableToAppend = null;
 	private String separator = "_";
+	protected Map<String,Object> customerSpecificValueMap = null;
 
 
 	public void setDatasourcesToModify(String[] datasourcesToModify) {
@@ -44,15 +48,13 @@ public class OEMDatasourceService  extends  DynamicallyPooledOrJndiDatasourceSer
 		}
 	}
 	///////////////////////////////// getters and setters /////////////////////////////////////////////////////////////////////////////
-	public String getSessionVariableToAppend() { return sessionVariableToAppend; }
-	public void   setSessionVariableToAppend(String sessionVariableToAppend) { this.sessionVariableToAppend = sessionVariableToAppend; }
-	public String getSeparator() { return separator; }
-	public void   setSeparator(String separator) { this.separator = separator; }
+	public void setCustomerSpecificValueMap( Map<String, Object> customerSpecificValueMap) { this.customerSpecificValueMap = customerSpecificValueMap; }
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
 	public DataSource getDataSource(String dsName) throws DBDatasourceServiceException {
-		if (datasourcesToModify.contains(dsName)){
+		if (datasourcesToModify.contains(dsName) || datasourcesToModify.contains("*")){
 			dsName = modifyDsNameForTenancy(dsName);
 		}
 		return super.getDataSource(dsName);
@@ -81,6 +83,22 @@ public class OEMDatasourceService  extends  DynamicallyPooledOrJndiDatasourceSer
 		String dsname = dsName.concat(separator).concat(varToAppend);
 		logger.debug("New DSName is "+dsname);
 		return dsname;
+	}
+	
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (customerSpecificValueMap != null){
+			if (customerSpecificValueMap.containsKey("sessionVariableToAppend")){
+				this.sessionVariableToAppend = customerSpecificValueMap.get("sessionVariableToAppend") + "";
+			}
+			if (customerSpecificValueMap.containsKey("datasourcesToModify")){
+				ArrayList<String> dss = (ArrayList<String>) customerSpecificValueMap.get("datasourcesToModify");
+				for (String ds : dss){
+					this.datasourcesToModify.add(ds);
+				}
+			}
+		}
 	}
 
 }

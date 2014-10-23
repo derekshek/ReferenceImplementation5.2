@@ -15,6 +15,10 @@ public class OEMWebServiceParser {
 	public String[] getRoles()            { return roles; }
 	public Map<String,String>             getSessionVariables() { return sessionVariables; }
 	
+	public OEMWebServiceParser() {
+	}
+	
+	
 	public String getPassword() {
 		if (password == null){
 			return "";

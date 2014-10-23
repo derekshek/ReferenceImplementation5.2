@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mondrian.i18n.LocalizingDynamicSchemaProcessor;
 import mondrian.olap.Util;
 import mondrian.spi.impl.FilterDynamicSchemaProcessor;
 
@@ -50,7 +51,7 @@ import org.dom4j.tree.DefaultElement;
 
 
 
-public class NoCodeDsp extends FilterDynamicSchemaProcessor implements mondrian.spi.DynamicSchemaProcessor {
+public class NoCodeDsp extends mondrian.i18n.LocalizingDynamicSchemaProcessor implements mondrian.spi.DynamicSchemaProcessor {
 
 	private static final String SUBSTITUTESTRING = ".replaceString";
 	private static String ALLSCHEMAS             = "ALL_SCHEMAS";
