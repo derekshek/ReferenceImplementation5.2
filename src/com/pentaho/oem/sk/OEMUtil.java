@@ -37,9 +37,13 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 import org.springframework.security.userdetails.User;
 
+import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
+
 
 public class OEMUtil {
 	public static final String PENTAHOADMIN = "Administrator";
+	public static final String PENTAHOADMINUSER = "admin";
+	public static final String PENTAHOREPOADMINUSER = "pentahoRepoAdmin";
 	public static final String PENTAHOAUTH = "Authenticated";
 	public static final String TOKEN_PREFIX = "TOKEN:";
 
@@ -102,7 +106,7 @@ public class OEMUtil {
 		
 //		authorities.add(new GrantedAuthorityImpl(role));
 
-		Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(),auth.getCredentials(),roleList.toArray(new GrantedAuthority[roleList.size()]));
+		Authentication newAuth = new OEMAuthenticationToken(auth.getPrincipal(),auth.getCredentials(),roleList.toArray(new GrantedAuthority[roleList.size()]));
 		SecurityContextHolder.getContext().setAuthentication(newAuth);
 	}
 	

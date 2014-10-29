@@ -1,0 +1,9 @@
+<user authenticated="true">
+  <name>jason</name>
+  <roles>
+     <role>SSOUser</role>
+     <role>random role</role>
+  </roles>
+  <tenantid>6</tenantid>
+  <tenantName>155-WIX-821</tenantName>
+</user>

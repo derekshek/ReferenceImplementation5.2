@@ -32,6 +32,7 @@ package com.pentaho.oem.sk.userrole.workaround;
 
 
 import java.util.LinkedList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
@@ -45,6 +46,8 @@ import org.springframework.security.userdetails.User;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
+
+import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
 
 
@@ -88,7 +91,12 @@ public class OEMWorkaroundUserDetailsService implements UserDetailsService, Init
 		LinkedList<GrantedAuthority> authorities;
 		authorities = new LinkedList<GrantedAuthority>();
 		authorities.add(new GrantedAuthorityImpl(OEMUtil.PENTAHOAUTH));
-		details = new User(username, username, true, true, true, true, authorities.toArray(new GrantedAuthority[0]));
+		authorities.add(new GrantedAuthorityImpl("SSOUser"));
+		
+		if (username.equals(OEMUtil.PENTAHOADMINUSER) || username.equals(OEMUtil.PENTAHOREPOADMINUSER)){
+			authorities.add(new GrantedAuthorityImpl(OEMUtil.PENTAHOADMIN));
+		}
+		details = new OEMUser(username, username, true, true, true, true, authorities.toArray(new GrantedAuthority[0]));
 		LOG.debug("Returning details: "+(details == null ? null : details.getUsername()));
 		return details;
 	}

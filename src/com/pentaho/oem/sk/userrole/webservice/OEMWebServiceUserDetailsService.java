@@ -120,24 +120,9 @@ public class OEMWebServiceUserDetailsService implements UserDetailsService, Init
 				}
 				conx.connect();
 				input = conx.getInputStream();
-				boolean success = webServiceParser.parseUserDetailsResponse(input);
-				if (success){
-					// Create the user from the parsed values
-					String name = webServiceParser.getUserName();
-					String password = webServiceParser.getPassword();
-					for (String current : webServiceParser.getRoles()){
-						authorities.add(new GrantedAuthorityImpl(roleMapper.toPentahoRole(current)));
-					}
-					if (pentahoAdmins.contains(username)){
-						authorities.add(new GrantedAuthorityImpl(OEMUtil.PENTAHOADMIN));
-					}
-					details = new OEMUser(name, password, true, true, true, true, authorities.toArray(new GrantedAuthorityImpl[0]));
-					Map<String, String> sessionVars = webServiceParser.getSessionVariables();
-					for (String variable : sessionVars.keySet()){
-						details.addSessionVariable(variable, sessionVars.get(variable));
-					}
-					LOG.debug("User "+ username + "validated from serviceURL " + actualURL);
-					return details;
+				OEMUser parsedUser = webServiceParser.parseUserDetailsResponse(input);
+				if (parsedUser != null){
+					return parsedUser;
 				}
 				LOG.debug("User "+ username + " not validated in webservice response from serviceURL");
 			} 

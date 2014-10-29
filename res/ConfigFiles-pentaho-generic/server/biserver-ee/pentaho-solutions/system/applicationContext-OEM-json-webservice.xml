@@ -146,7 +146,7 @@
     
         <property name="serviceURLs">
            <list>
-              <value>file:///@@@PENTAHO_HOME@@@/sample-xml-sso/{secret}.xml</value>
+              <value>file:///@@@PENTAHO_HOME@@@/sample-json-sso/{secret}.json</value>
            </list>
         </property>
         <property name="roleMapper" ref="webserviceRoleMapper" />
@@ -162,9 +162,9 @@
     <bean id="webserviceUserRoleListService" class="com.pentaho.oem.sk.userrole.webservice.OEMWebServiceUserRoleListService">
     <constructor-arg ref="tenantedUserNameUtils"/>
        <property name="parentUserDetailsService" ref="cachingMultiUserDetailsService" />
-       <property name="urlAllRoles" value="file:///@@@PENTAHO_HOME@@@/sample-xml-sso/allroles.xml"/>
-        <property name="urlAllUsers" value="file:///@@@PENTAHO_HOME@@@/sample-xml-sso/allusers.xml"/>
-        <property name="urlUsersInRole" value="file:///@@@PENTAHO_HOME@@@/sample-xml-sso/usersinrole.xml"/>
+       <property name="urlAllRoles" value="file:///@@@PENTAHO_HOME@@@/sample-json-sso/allroles.xml"/>
+        <property name="urlAllUsers" value="file:///@@@PENTAHO_HOME@@@/sample-json-sso/allusers.xml"/>
+        <property name="urlUsersInRole" value="file:///@@@PENTAHO_HOME@@@/sample-json-sso/usersinrole.xml"/>
     </bean>
 
 

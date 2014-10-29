@@ -1,0 +1,12 @@
+{ "accessToken" : "7bfe23b4-a3c4-495b-a64e-2a2297f4b4b3:int:155-WIX-821",
+  "info" : { 
+      "email"   : "sean@someothercompany.org",
+      "apiOnlyUser" : false,
+      "language" : "en_US",
+      "locale" : "en_US",
+      "tenantName" : "Seanimo",
+      "tenantid" : "1",
+      "timeZone" : "America/Los_Angeles",
+      "userRoles" :  "Sean's Role" 
+    }
+}

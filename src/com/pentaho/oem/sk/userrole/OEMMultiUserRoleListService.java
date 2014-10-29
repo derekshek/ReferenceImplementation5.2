@@ -161,21 +161,7 @@ public class OEMMultiUserRoleListService implements IUserRoleListService, Initia
     	username = userNameUtils.getPrincipleName(username);
     	GrantedAuthority[] authorities = null;
         Set<String> results = new HashSet<String>();
-        
-        // Most of these calls are for the current user - avoid calling userDetails if possible
-        try {
-        	if (username.equals(PentahoSessionHolder.getSession().getName())){
-        		authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-//        		LOG.debug("getRolesForUser(tenant,"+username+") -same-user-");
-        	}
-        	for (GrantedAuthority ga : authorities){
-        		results.add(ga.toString());
-        	}
-        	return new ArrayList<String>(results);
-        } catch (NullPointerException e){
-//        	LOG.debug("No session or security context for "+username);
-        }
-
+ 
 
         for (Iterator<IUserRoleListService> it = userRoleListServices.iterator(); it.hasNext();) {
             IUserRoleListService iUserRoleListService = it.next();

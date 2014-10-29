@@ -8,6 +8,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.Authentication;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 
+import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
+
+import java.util.Map;
+
 public class OEMFilterHelper  implements InitializingBean{
 
 
@@ -16,13 +20,16 @@ public class OEMFilterHelper  implements InitializingBean{
 	public static final String LOOKINPARAMETER = "parameter";
 	public static final String LOOKINHEADER    = "header";
 	public static final String LOOKINCOOKIE    = "cookie";
-	
+    protected Map<String,Object> customerSpecificValueMap = null;
+
 ///////////////////////////////////////////////  Getters and setters ///////////////////////////////////////
 	public String getParameterName() { return parameterName; }
 	public void setParameterName(String parameterName) { this.parameterName = parameterName; }
 
 	public String getWhereIsTheToken()                       { return whereIsTheToken; }
 	public void   setWhereIsTheToken(String whereIsTheToken) { this.whereIsTheToken = whereIsTheToken; }
+    public void setCustomerSpecificValueMap( Map<String, Object> customerSpecificValueMap) { this.customerSpecificValueMap = customerSpecificValueMap; }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public String getToken(HttpServletRequest request){ 
@@ -42,17 +49,20 @@ public class OEMFilterHelper  implements InitializingBean{
 				}
 			}
 		}
-		
+		int qmark;
+		if (token != null && (qmark = token.indexOf('?')) > -1){
+			token = token.substring(0,qmark);
+		}
 		return token; 
 	}
 	
 	
-	public boolean requiresAuthentication(UsernamePasswordAuthenticationToken existing, String secretValue) {
-		 return !((UsernamePasswordAuthenticationToken) existing).getCredentials().equals(secretValue);
+	public boolean requiresAuthentication(OEMAuthenticationToken existing, String secretValue) {
+		 return false;
 	}
 	
-	public String resolveUsername (String token){ 
-		return token; 
+	public OEMAuthenticationToken resolveUsername (String secret){ 
+		return new OEMAuthenticationToken(secret,secret); 
 	}
 	
 	public void setSessionVariables(HttpServletRequestWrapper wrapper, Authentication authResult) {

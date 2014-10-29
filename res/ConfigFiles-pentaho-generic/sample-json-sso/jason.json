@@ -1,0 +1,12 @@
+{ "accessToken" : "7bfe23b4-a3c4-495b-a64e-2a2297f4b4b3:int:155-WIX-821",
+  "info" : { 
+      "email"   : "jason@somecompany.com",
+      "apiOnlyUser" : false,
+      "language" : "en_US",
+      "locale" : "en_US",
+      "tenantName" : "155-WIX-821",
+      "tenantid" : "6",
+      "timeZone" : "America/Los_Angeles",
+      "userRoles" : [ "role1", "role2", "role3" ]
+    }
+}

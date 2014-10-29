@@ -46,8 +46,6 @@
 
    <bean id="ssoFilterHelper" class="com.customerspecific.CustomFilterHelper">
        <property name="customerSpecificValueMap" ref="customerSpecificValueMap" />
-        <property name="webServiceParser" ref="webServiceParser" />
-        <property name="userDetailsService" ref="webserviceUserDetailsService" />
         <property name="parameterName"   value="secret" />
         <property name="whereIsTheToken" value="parameter" />
    <!-- 
@@ -62,7 +60,6 @@
 
 
     <!--  XML Webservice response -->
-<!-- 
 	<bean id="webServiceParser" class="com.customerspecific.CustomXmlWebServiceParser">
 		<property name="roleTags">
 			<list>
@@ -73,25 +70,6 @@
 			<list>
 				<value>tenantid</value>
 				<value>tenantName</value>
-			</list>
-		</property>
-	</bean>
- -->
- 
-    <!--  JSON Webservice response -->
-	<bean id="webServiceParser" class="com.customerspecific.CustomJsonWebServiceParser">
-		<property name="roleMapper">
-			<ref local="webserviceRoleMapper" />
-		</property>
-		<property name="usernameTag" value="email" />
-		<property name="roleTags">
-			<list>
-				<value>roles</value>
-			</list>
-		</property>
-		<property name="variableTags">
-			<list>
-				<value>tenantId</value>
 			</list>
 		</property>
 	</bean>
@@ -107,11 +85,6 @@
         <property name="authenticationManager">
             <ref bean="authenticationManager" />
         </property>
-        <!--  Do not use this property - it will not work currently 
-        <property name="overrideAuthenticationProvider">
-            <ref bean="oemAuthenticationProvider" />
-        </property>
-        --> 
         <property name="filterHelper">
             <ref bean="ssoFilterHelper" />
         </property>
@@ -161,6 +134,7 @@
 
     <bean id="webserviceUserRoleListService" class="com.pentaho.oem.sk.userrole.webservice.OEMWebServiceUserRoleListService">
     <constructor-arg ref="tenantedUserNameUtils"/>
+        <property name="webServiceParser" ref="webServiceParser" />
        <property name="parentUserDetailsService" ref="cachingMultiUserDetailsService" />
        <property name="urlAllRoles" value="file:///@@@PENTAHO_HOME@@@/sample-xml-sso/allroles.xml"/>
         <property name="urlAllUsers" value="file:///@@@PENTAHO_HOME@@@/sample-xml-sso/allusers.xml"/>
@@ -169,61 +143,6 @@
 
 
 
-<!--  ################################### KTR UserDetails -->
-    <bean id="ktrUserDetailsService" class="com.pentaho.oem.sk.userrole.ktr.OEMKTRUserDetailsService">
-        <property name="serviceKTR" value="@@@PENTAHO_HOME@@@/userDetails.ktr"/>
-        <property name="tokenResolverKTR" value="@@@PENTAHO_HOME@@@/sample-ktr/tokenResolver.ktr"/>
-
-        <constructor-arg ref="tenantedUserNameUtils"/>
-    </bean>
-
-<!--  ################################### KTR UserRoleList -->
-
-    <bean id="ktrUserRoleListService" class="com.pentaho.oem.sk.userrole.ktr.OEMKTRUserRoleListService">
-       <constructor-arg ref="tenantedUserNameUtils"/>
-       <property name="parentUserDetailsService" ref="cachingMultiUserDetailsService" />
-       <property name="ktrAllRoles"    value="@@@PENTAHO_HOME@@@/sample-ktr/allroles.ktr"/>
-       <property name="ktrAllUsers"    value="@@@PENTAHO_HOME@@@/sample-ktr/allusers.ktr"/>
-       <property name="ktrUsersInRole" value="@@@PENTAHO_HOME@@@/sample-ktr/usersinrole.ktr"/>
-    </bean>
-
-
-<!-- ################################### JNDI UserDetails -->
-       <bean id="jndiUserDetailsService" class="com.pentaho.oem.sk.userrole.jndi.OEMJndiUserDetailsService">
-                <constructor-arg ref="tenantedUserNameUtils"/>
-                <!-- JNDI name to database connection. JNDI must be defined in context.xml in tomcat -->
-                <property name="jndiName" value="authDatasource"/>
-                <!-- sql for calls -->
-                <property name="sqlRolesForUser" value="select r.name from code.role r JOIN config.atiuser u on r.roleid = u.roleid where u.userid = ?" />
-       </bean>
-
-<!-- ################################### JNDI UserRoleList -->
-       <bean id="jndiUserRoleListService" class="com.pentaho.oem.sk.userrole.jndi.OEMJndiUserRoleListService">
-                <constructor-arg ref="tenantedUserNameUtils"/>
-                <property name="parentUserDetailsService" ref="cachingMultiUserDetailsService" />
-                <!-- JNDI name to database connection. JNDI must be defined in context.xml in tomcat -->
-                <property name="jndiName" value="authDatasource"/>
-                <!-- sql for calls -->
-                <property name="sqlAllRoles"     value="select distinct(name) from code.role" />
-                <property name="sqlAllUsers"     value="select userid from config.atiuser" />
-                <property name="sqlUsersInRole"  value="select u.userid from config.atiuser u JOIN code.role r on r.roleid = u.roleid where r.roleid = ?" />
-                <property name="sqlRolesForUser" value="select r.name from code.role r JOIN config.atiuser u on r.roleid = u.roleid where u.userid = ?" />
-       </bean>
-
-
-<!--  ################################### Workaround UserDetails -->
-    <bean id="workaroundUserDetailsService"
-        class="com.pentaho.oem.sk.userrole.workaround.OEMWorkaroundUserDetailsService">
-        <constructor-arg ref="tenantedUserNameUtils"/>
-    </bean>
-
-<!--  ################################### Workaround UserRoleList -->
-
-    <bean id="workaroundUserRoleListService"
-        class="com.pentaho.oem.sk.userrole.workaround.OEMWorkaroundUserRoleListService">
-        <constructor-arg ref="tenantedUserNameUtils"/>
-    </bean>
-
 
 <!-- #######################################  Multi (proxy) UserDetails and Role List Services - invoke by Auth Providers & others  ############################## -->
 
@@ -231,13 +150,8 @@
    <bean id="oemMultiUserDetailsService" class="com.pentaho.oem.sk.userrole.OEMMultiUserDetailsService">
         <property name="userDetailsServices">
            <list>
-<!--
-            <ref bean="ktrUserDetailsService" />
-            <ref bean="jndiUserDetailsService" />
             <ref bean="webserviceUserDetailsService" />
--->
             <ref bean="UserDetailsService" />
-            <ref bean="workaroundUserDetailsService" />    <!-- PUT THIS LAST IF YOU NEED TO USE IT -->
            </list>
         </property>
 <!-- remove this if you want it to be a primary, non caching implementation (sub services can cache if they want)
@@ -271,12 +185,7 @@
         <constructor-arg ref="tenantedUserNameUtils"/>
         <property name="userRoleListServices">
            <list>
-<!--
-            <ref bean="ktrUserRoleListService" />
-            <ref bean="jndiUserRoleListService" />
             <ref bean="webserviceUserRoleListService" />
--->
-            <ref bean="workaroundUserRoleListService" />
             <ref bean="userRoleListService" />
            </list>
         </property>

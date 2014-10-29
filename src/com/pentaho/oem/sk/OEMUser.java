@@ -43,6 +43,10 @@ public class OEMUser extends User {
 				new GrantedAuthority[0]);
 	}
 
+	public OEMUser(String username, String password, GrantedAuthority[] authorities) {
+		super(username, password, true, true, true, true, authorities);
+	}
+
 	public OEMUser(String username, String password, boolean enabled,
 			boolean accountNonExpired, boolean credentialsNonExpired,
 			boolean accountNonLocked, GrantedAuthority[] authorities)
@@ -57,6 +61,7 @@ public class OEMUser extends User {
 				details.isEnabled(), details.isAccountNonExpired(), details
 						.isAccountNonLocked(), details.getAuthorities());
 	}
+
 
 	public void addSessionVariable(String id, String value) {
 		sessionVariables.put(id, value);

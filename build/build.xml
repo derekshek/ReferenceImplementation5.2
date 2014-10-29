@@ -38,9 +38,8 @@
 	<path id="compile.classpath">
 	<!-- set classpath -->
 		<fileset dir="${pentaho-install}/${pentaho-webapp-lib}">
+			<exclude name="**/${dist-jar-name},**/${cust-jar-name}" />
 			<include name="**/*.jar" />
-			<exclude name="${dist-jar-name}" />
-			<exclude name="${cust-jar-name}" />
 		</fileset>
 		<fileset dir="${pentaho-install}/${tomcat-lib}">
 			<include name="servlet-api.jar" />
@@ -214,6 +213,7 @@
 		
 		<copy file="${res-pentaho-generic}/restartBA" tofile="${pentaho-install}/restartBA" />
 		<chmod file="${pentaho-install}/restartBA" perm="755"/>
+		<mkdir dir="${setupScripts}" />
 
 		 <apply executable="bash" addsourcefile="true" relative="false" > 
 				 	<srcfile />
@@ -233,15 +233,15 @@
 
 	<target name="publishContent">
 	    <!-- Copy to tmp dir for string substitution -->
-		<mkdir dir="${publish-content}/tmp" />
-		<copy todir="${publish-content}/tmp" overwrite="true">
+		<mkdir dir="${publish-content}/../tmp" />
+		<copy todir="${publish-content}/../tmp" overwrite="true">
 			<fileset dir="${publish-content}">
 			   <include name="**/*"/>
 			</fileset>
 		</copy>
 
 	    <!-- perform string substitution -->
-		<replace dir="${publish-content}/tmp" value="${pentaho-install}" excludes="*jar" >
+		<replace dir="${publish-content}/../tmp" value="${pentaho-install}" excludes="*jar" >
 		    <replacetoken>@@@PENTAHO_HOME@@@</replacetoken>
 		</replace>
 		
@@ -260,10 +260,13 @@
 		 	<arg value="--retainOwnership=true"/>
 		 	<arg value="--permission=true"/>
 		 	
-		    <fileset dir="${publish-content}/tmp" casesensitive="yes">
+		    <fileset dir="${publish-content}/../tmp" casesensitive="yes">
 		      <include name="**/*"/>
 		    </fileset>
 		  </apply>
+
+                  <delete dir="${publish-content}/../tmp" />
+
 	</target>
 	
 	<target name="publishContentPost">
@@ -310,6 +313,7 @@
 		</target>	
 	
 	<target name="publishMetadata">
+		<mkdir dir="${publish-metadata}" />
 				 <apply executable="curl" addsourcefile="true" relative="true" > 
 				 	<mapper type="regexp" from="(.*)\.xmi" to="\1" />
 				 	<arg value="-F" />
@@ -329,24 +333,27 @@
 				  </apply>
 			</target>	
 		
-	<target name="publishJDBC">
-				 <apply executable="curl" addsourcefile="true" relative="true" > 
-				 	<mapper type="regexp" from="(.*)\.json" to="\1" />
-				 	<arg value="-X" />
-				 	<arg value="POST" />
-				 	<arg value="--header" />
-				 	<arg value="Content-Type:application/json" />
-				 	<arg value="-d" />
-				 	<srcfile prefix="@${publish-jdbc}/" />
-				 	<arg value="-u" />
-				 	<arg value="admin:password"/>
-				 	<arg value="http://localhost:8080/pentaho/plugin/data-access/api/connection/add"/>
-				 	
-				    <fileset dir="${publish-jdbc}" casesensitive="yes">
-				      <include name="**/*json"/>
-				    </fileset>
-				  </apply>
-	</target>
+           <target name="publishJDBC">
+		<mkdir dir="${publish-jdbc}" />
+                                         <apply executable="echo" addsourcefile="true" relative="true" >
+                                                <mapper type="regexp" from="(.*)\.json" to="\1" />
+                                                <arg value="-X" />
+                                                <!-- <arg value="POST" /> -->
+                                                    <arg value="PUT" />
+                                                <arg value="--header" />
+                                                <arg value="Content-Type:application/json" />
+                                                <arg value="-d" />
+                                                <srcfile prefix="@${publish-jdbc}/" />
+                                                <arg value="-u" />
+                                                <arg value="admin:password"/>
+                                                <!-- <arg value="http://localhost:8080/pentaho/plugin/data-access/api/connection/add"/> -->
+                                                    <targetfile prefix="http://localhost:8080/pentaho/plugin/data-access/api/datasource/jdbc/connection/"/>
+                                            <fileset dir="${publish-jdbc}" casesensitive="yes">
+                                              <include name="**/*json"/>
+                                            </fileset>
+                                          </apply>
+           </target>
+
 	
 	<target name="updateJars">
 		<!-- JAR files to update (messages) and deploy -->
@@ -369,6 +376,8 @@
 		<delete dir="${classes}" />
 		<delete dir="${customclasses}" />
 		<delete dir="${dist}" />
+		<delete file="${pentaho-install}/${pentaho-webapp-lib}/${dist-jar-name}.jar" />
+		<delete file="${pentaho-install}/${pentaho-webapp-lib}/${cust-jar-name}.jar" />
 	</target>
 
 

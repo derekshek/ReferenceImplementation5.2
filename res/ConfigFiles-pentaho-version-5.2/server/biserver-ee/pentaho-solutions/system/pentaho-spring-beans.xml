@@ -83,7 +83,12 @@ http://www.pentaho.com/schema/pentaho-system http://www.pentaho.com/schema/penta
     <import resource="applicationContext-pentaho-security-jdbc.xml" />
   <import resource="applicationContext-spring-security-jdbc.xml" />
 
-    <import resource="applicationContext-OEM.xml" />               <!--  ADD THIS LINE -->
+<!--                              SELECT THE CONFIGURATION CLOSEST TO YOUR NEEDS            -->
+<!--  
+    <import resource="applicationContext-OEM-json-workaround.xml" />            
+    <import resource="applicationContext-OEM-xml-workaround.xml" />            
+-->
+    <import resource="applicationContext-OEM-xml-webservice.xml" />            
   
   <import resource="pentahoObjects.spring.xml" />
   <!-- <import resource="GettingStartedDB-spring.xml" />  -->

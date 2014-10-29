@@ -13,7 +13,7 @@
  * HELP-DESK SERVICES. 
  * @author khanrahan
  * @version 1.01 
-*/
+ */
 package com.pentaho.oem.sk.filters;
 /**
  * COPYRIGHT (C) 2013 Pentaho. All Rights Reserved.
@@ -48,6 +48,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.platform.api.engine.IPentahoSession;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -62,6 +64,9 @@ import org.springframework.security.providers.UsernamePasswordAuthenticationToke
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
 import org.springframework.security.ui.AuthenticationEntryPoint;
 import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+
+import com.pentaho.oem.sk.OEMUser;
+import com.pentaho.oem.sk.authentication.OEMAuthenticationToken;
 
 /**
  * The instance works by creating a {@link UsernamePasswordAuthenticationToken} using the
@@ -92,9 +97,9 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 
 	private ApplicationEventPublisher eventPublisher;
 	private boolean                  lenient = false;
-	
-	
-///////////////////////////////////////////////   Getters and Setters ///////////////////////////////////////////////
+
+
+	///////////////////////////////////////////////   Getters and Setters ///////////////////////////////////////////////
 	public    AuthenticationProvider   getOverrideAuthenticationProvider() { return overrideAuthenticationProvider; }
 	public    void                     setOverrideAuthenticationProvider(AuthenticationProvider overrideAuthenticationProvider) { this.overrideAuthenticationProvider = overrideAuthenticationProvider; }
 	protected AuthenticationManager    getAuthenticationManager()          { return authenticationManager; }
@@ -105,7 +110,7 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 	public    void                     setAuthenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) { this.authenticationEntryPoint = authenticationEntryPoint; }
 	public    OEMFilterHelper          getFilterHelper()                   { return filterHelper; }
 	public    void                     setFilterHelper(OEMFilterHelper filterHelper) { this.filterHelper = filterHelper; }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	@Override
@@ -113,51 +118,46 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		AuthenticationException failure = null;
 		//////////////////////// as this filter consumes input, we need to buffer it for later -- this class does the trick
 		HttpServletRequestWrapper wrapper = new BufferingHttpServletRequest(request, LOG);
-		
-		String secretValue = filterHelper.getToken(wrapper);
-		if (secretValue != null) {
-//			LOG.debug("Found secret "+secretValue);
-			if (requiresAuthentication(secretValue)) {
-//				SecurityContextHolder.clearContext();
-//				HttpSession session = request.getSession(false);
-//				if (session != null) {
-//		            session.invalidate();
-//		        }
-				String username = filterHelper.resolveUsername(secretValue);
-				LOG.debug("User Requires Authentication!  -- Resolved to "+username);
-				if (username == null){
-					failure = new BadCredentialsException("unable to resolve username into token");
-				}else{
-					UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, secretValue);
-					token.setDetails(authenticationDetailsSource.buildDetails(wrapper));
 
-					try {
-						Authentication authResult;
-						if (overrideAuthenticationProvider != null){
-							LOG.debug("calling authenticate with override authenticationProvider "+overrideAuthenticationProvider);
-							authResult = overrideAuthenticationProvider.authenticate(token);
-						}else{
-							LOG.debug("calling authenticate with default authenticationManager "+authenticationManager);
-							authResult = authenticationManager.authenticate(token);
-						}
-						filterHelper.setSessionVariables(wrapper,authResult);
-						LOG.debug("Got authResult " + authResult);
-						SecurityContextHolder.getContext().setAuthentication(authResult); 
-						LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
-						// New for 5.0 -- this ensures the startup action gets called....
-						InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());
-						if (eventPublisher != null){
-							eventPublisher.publishEvent(event);
-						}
-					} catch (AuthenticationException ex) {
-						failure = ex;
-						LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
-					} catch (Exception ex) {
-						LOG.error("Authenticating failed for "+username +":"+ ex); //$NON-NLS-1$
-					}
+		String secretValue = filterHelper.getToken(wrapper);
+		if (secretValue != null && requiresAuthentication(secretValue)) {
+			LOG.debug("User Requires Authentication -- "+secretValue);
+			OEMAuthenticationToken userToken = filterHelper.resolveUsername(secretValue);
+			if (userToken == null){
+				failure = new BadCredentialsException("unable to resolve username into token");
+			}
+
+			try {
+				LOG.debug("calling authenticate with default authenticationManager "+authenticationManager);
+
+				// If authentication fails, an exception will be thrown and caught below
+				Authentication authResult = authenticationManager.authenticate(userToken);
+
+				// If we get here, the user is valid
+				IPentahoSession session = PentahoSessionHolder.getSession();
+				for (String var : ((OEMUser)authResult.getDetails()).getSessionVariables()){
+					LOG.debug("Setting var " + var);
+					session.setAttribute(var, ((OEMUser)authResult.getDetails()).getSessionVariable(var));
 				}
+				filterHelper.setSessionVariables(wrapper,authResult);
+
+				// the user becomes authenticated by this:
+				SecurityContextHolder.getContext().setAuthentication(authResult); 
+				LOG.debug("Authenticated User "+authResult.getName()); //$NON-NLS-1$
+
+				// New for 5.0 -- this ensures the startup action gets called....
+				InteractiveAuthenticationSuccessEvent event = new InteractiveAuthenticationSuccessEvent(authResult, this.getClass());
+				if (eventPublisher != null){
+					eventPublisher.publishEvent(event);
+				}
+			} catch (AuthenticationException ex) {
+				failure = ex;
+				LOG.error("Authenticating failed for "+userToken +":"+ ex); //$NON-NLS-1$
+			} catch (Exception ex) {
+				LOG.error("Authenticating failed for "+userToken +":"+ ex); //$NON-NLS-1$
 			}
 		}
+		
 		if (isLenient() || (failure == null)) {
 			chain.doFilter(wrapper, response);
 		} else {
@@ -168,12 +168,12 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		}
 	}
 
-	
+
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-		 this.eventPublisher = eventPublisher;
+		this.eventPublisher = eventPublisher;
 	}
-	
+
 	private boolean requiresAuthentication(String secretValue) {
 		boolean required = false;
 		Authentication existing = SecurityContextHolder.getContext().getAuthentication();
@@ -182,8 +182,8 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 			required = true;
 		}
 
-		if (!required && (existing instanceof UsernamePasswordAuthenticationToken)) {
-			required = filterHelper.requiresAuthentication((UsernamePasswordAuthenticationToken) existing, secretValue);
+		if (!required && (existing instanceof OEMAuthenticationToken)) {
+			required = filterHelper.requiresAuthentication((OEMAuthenticationToken) existing, secretValue);
 		}
 
 		if (existing instanceof AnonymousAuthenticationToken) {
@@ -191,8 +191,8 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 		}
 		return required;
 	}
-	
-	
+
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 	}
@@ -205,46 +205,46 @@ public class OEMGenericSSOFilter extends AuthenticationProcessingFilter implemen
 
 
 class BufferingHttpServletRequest extends HttpServletRequestWrapper {
-	  private ByteArrayOutputStream cachedBytes;
+	private ByteArrayOutputStream cachedBytes;
 
-	  public BufferingHttpServletRequest(HttpServletRequest request, Log LOG) {
-	    super(request);
+	public BufferingHttpServletRequest(HttpServletRequest request, Log LOG) {
+		super(request);
 		try {
 			getInputStream();
 		} catch (IOException e) {
 			LOG.error("HTTP Wrapper failed: "+e);
 			e.printStackTrace();
 		}
-	  }
-
-	  @Override
-	  public ServletInputStream getInputStream() throws IOException {
-	    if (cachedBytes == null)
-	      cacheInputStream();
-
-	      return new CachedServletInputStream();
-	  }
-
-	  private void cacheInputStream() throws IOException {
-	    /* Cache the inputstream in order to read it multiple times. For
-	     * convenience, I use apache.commons IOUtils
-	     */
-	    cachedBytes = new ByteArrayOutputStream();
-	    IOUtils.copy(super.getInputStream(), cachedBytes);
-	  }
-
-	  /* An inputstream which reads the cached request body */
-	  public class CachedServletInputStream extends ServletInputStream {
-	    private ByteArrayInputStream input;
-
-	    public CachedServletInputStream() {
-	      /* create a new input stream from the cached request body */
-	      input = new ByteArrayInputStream(cachedBytes.toByteArray());
-	    }
-
-	    @Override
-	    public int read() throws IOException {
-	      return input.read();
-	    }
-	  }
 	}
+
+	@Override
+	public ServletInputStream getInputStream() throws IOException {
+		if (cachedBytes == null)
+			cacheInputStream();
+
+		return new CachedServletInputStream();
+	}
+
+	private void cacheInputStream() throws IOException {
+		/* Cache the inputstream in order to read it multiple times. For
+		 * convenience, I use apache.commons IOUtils
+		 */
+		cachedBytes = new ByteArrayOutputStream();
+		IOUtils.copy(super.getInputStream(), cachedBytes);
+	}
+
+	/* An inputstream which reads the cached request body */
+	public class CachedServletInputStream extends ServletInputStream {
+		private ByteArrayInputStream input;
+
+		public CachedServletInputStream() {
+			/* create a new input stream from the cached request body */
+			input = new ByteArrayInputStream(cachedBytes.toByteArray());
+		}
+
+		@Override
+		public int read() throws IOException {
+			return input.read();
+		}
+	}
+}

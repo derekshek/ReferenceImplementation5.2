@@ -13,7 +13,7 @@
  * HELP-DESK SERVICES. 
  * @author khanrahan
  * @version 1.01 
-*/
+ */
 package com.pentaho.oem.sk.authentication;
 
 /**
@@ -37,15 +37,16 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.springframework.security.Authentication;
 import org.springframework.security.AuthenticationException;
+import org.springframework.security.BadCredentialsException;
 import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
 import org.springframework.security.providers.dao.DaoAuthenticationProvider;
 import org.springframework.security.userdetails.UserDetails;
+
 import com.pentaho.oem.sk.OEMUser;
 import com.pentaho.oem.sk.OEMUtil;
 
 /**
- * Attempts to authenticate a {@link UsernamePasswordAuthenticationToken}. The class
+ * Attempts to authenticate a {@link OEMAuthenticationToken}. The class
  * interacts with a {@link #setServiceURL(String) parameterized URL} to retrieve
  * an input stream that provides the user's name and roles.
  */
@@ -53,75 +54,47 @@ import com.pentaho.oem.sk.OEMUtil;
 public class OEMAuthenticationProvider extends DaoAuthenticationProvider {
 
 	private static final Log LOG = LogFactory.getLog(OEMAuthenticationProvider.class);
-	
-//	private UserDetailsService userDetailsService;
-//
-//	public void setUserDetailsService(UserDetailsService s){
-//		LOG.debug("settng userdetails service to "+s);
-//		this.userDetailsService = s;
-//	}
-//
-//	public UserDetailsService getUserDetailsService(){
-//		return userDetailsService;
-//	}
-//
-//	@Override
-//	public void doAfterPropertiesSet() throws Exception {
-//		LOG.debug("Properties are set");
-//		Assert.notNull(userDetailsService);
-//	}
+
 
 	@Override
 	public Authentication authenticate(Authentication token) throws AuthenticationException {
-		UsernamePasswordAuthenticationToken results = null;
+		OEMAuthenticationToken results = null;
 
 		LOG.debug("authenticate");
 		if (supports(token.getClass())) {
-			results = executeService((UsernamePasswordAuthenticationToken) token);
+			results = executeService((OEMAuthenticationToken) token);
 		}
 		return results;
 	}
 
 
-	protected UsernamePasswordAuthenticationToken executeService(UsernamePasswordAuthenticationToken intoken) throws AuthenticationException {
+	protected OEMAuthenticationToken executeService(OEMAuthenticationToken intoken) throws AuthenticationException {
 		UserDetails details;
 
-
-		if ("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".equals("0")) {
-			OEMUser user = new OEMUser("sean", "foo", true, true, true, true, new GrantedAuthority[0]);
-//			user.addRole(OEMUtil.PENTAHOADMIN);
-			user.addRole(OEMUtil.PENTAHOAUTH);
-			details = user;
-		}else{
-			LOG.debug("calling loadUserByUsername " + intoken.getName() + " using " + getUserDetailsService());
-			details = getUserDetailsService().loadUserByUsername(intoken.getName());
-		}
+		Object inDetails = intoken.getDetails();
 		
+		// If the token details has role Authenticated, we just return - user is authenticated
+		if (inDetails != null && inDetails instanceof OEMUser && ((OEMUser)inDetails).hasRole(OEMUtil.PENTAHOAUTH)){
+			LOG.debug("User is pre-authenticated by the OEM Filter");
+			return new OEMAuthenticationToken(intoken.getName(), intoken.getCredentials().toString(),intoken.getAuthorities());
+		}
+
+		// Defer to UserDetails to get/validate the user - this happens if ResolveUsername does not have access to all the info
+		LOG.debug("calling loadUserByUsername " + intoken.getName() + " using " + getUserDetailsService());
+		details = getUserDetailsService().loadUserByUsername(intoken.getName());
 		if (!(details instanceof OEMUser)){
 			details = new OEMUser(details);
 		}
-
-		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
-				details.getUsername(),
-				intoken.getCredentials(),
-				details.getAuthorities());
-
-		result.setDetails(details);
-		IPentahoSession session = PentahoSessionHolder.getSession();
-		LOG.debug("setting in the session " + session);
-		for (String var : ((OEMUser)details).getSessionVariables()){
-			LOG.debug("Setting var " + var);
-			session.setAttribute(var, ((OEMUser)details).getSessionVariable(var));
-		}
-
-		return result;
+		OEMAuthenticationToken newTok = new OEMAuthenticationToken(details.getUsername(), intoken.getName().toString(),details.getAuthorities());
+		newTok.setDetails(details);
+		return newTok;
 	}
-	
+
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean supports(Class clazz) {
-		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(clazz));
+		return (OEMAuthenticationToken.class.isAssignableFrom(clazz));
 	}
 
 }

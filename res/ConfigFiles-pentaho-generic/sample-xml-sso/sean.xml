@@ -2,6 +2,7 @@
   <name>sean</name>
   <roles>
      <role>SSOUser</role>
+     <role>sean's role</role>
   </roles>
   <tenantid>1</tenantid>
   <tenantName>Seanimo</tenantName>

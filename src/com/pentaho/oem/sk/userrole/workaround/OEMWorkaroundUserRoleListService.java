@@ -140,10 +140,13 @@ public class OEMWorkaroundUserRoleListService  implements IUserRoleListService, 
      */  
     public List<String> getRolesForUser(ITenant tenant, String username) {
 
-        LOG.debug("getRolesForUser() tenant");
+        LOG.debug("getRolesForUser("+username+") tenant "+tenant);
      	username = userNameUtils.getPrincipleName(username);
      	LinkedList<String> roleList = new LinkedList<String>();
      	roleList.add(OEMUtil.PENTAHOAUTH);
+     	if (username.endsWith(OEMUtil.PENTAHOADMINUSER) || username.equals(OEMUtil.PENTAHOREPOADMINUSER)){
+     		roleList.add(OEMUtil.PENTAHOADMIN);
+     	}
      	return roleList;
      }
     

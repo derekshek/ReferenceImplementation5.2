@@ -50,7 +50,12 @@ public class OEMWebServiceUserRoleListService  implements IUserRoleListService, 
     private String urlAllRoles;
     private String urlAllUsers;
     private String urlUsersInRole;
+	private   OEMWebServiceParser            webServiceParser;
 
+    ////////////////////////////////// Getters & Setters /////////////////////////////////////////////////////////////////
+    public OEMWebServiceParser getWebServiceParser()                      { return webServiceParser; }
+	public void setWebServiceParser(OEMWebServiceParser webServiceParser) { this.webServiceParser = webServiceParser; }
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -64,6 +69,7 @@ public class OEMWebServiceUserRoleListService  implements IUserRoleListService, 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(userDetailsService);
+		Assert.notNull(webServiceParser);
 	}
 
     
